@@ -8,8 +8,8 @@ import (
 
 func testTypes(
 	t *testing.T,
-	expected *Type,
-	actual *Type) {
+	expected *Symbol,
+	actual *Symbol) {
 
 	if expected == nil && actual == nil {
 		return
@@ -21,8 +21,8 @@ func testTypes(
 			"\tActual: %v\n", expected.Name, actual.Name)
 	}
 
-	for index, _ := range expected.Type {
-		testTypes(t, expected.Type[index], actual.Type[index])
+	for index, _ := range expected.Types {
+		testTypes(t, expected.Types[index], actual.Types[index])
 	}
 }
 
@@ -85,8 +85,8 @@ type MyInt int
 				Exported: []*Symbol{
 					&Symbol{
 						Name: "MyInt",
-						Types: []*Type{
-							&Type{Name: "int"},
+						Types: []*Symbol{
+							&Symbol{Name: "int"},
 						},
 					},
 				},
@@ -115,10 +115,10 @@ type MyInt struct {
 				Exported: []*Symbol{
 					&Symbol{
 						Name: "MyInt",
-						Types: []*Type{
-							&Type{"A", []*Type{&Type{Name: "int"}}},
-							&Type{"B", []*Type{&Type{Name: "float32"}}},
-							&Type{"C", []*Type{&Type{Name: "string"}}},
+						Types: []*Symbol{
+							&Symbol{"A", []*Symbol{&Symbol{Name: "int"}}},
+							&Symbol{"B", []*Symbol{&Symbol{Name: "float32"}}},
+							&Symbol{"C", []*Symbol{&Symbol{Name: "string"}}},
 						},
 					},
 				},
@@ -149,11 +149,11 @@ type MyInt struct {
 				Exported: []*Symbol{
 					&Symbol{
 						Name: "MyInt",
-						Types: []*Type{
-							&Type{"A", []*Type{&Type{Name: "int"}}},
-							&Type{"B", []*Type{
-								&Type{"C", []*Type{&Type{Name: "float32"}}},
-								&Type{"D", []*Type{&Type{Name: "string"}}},
+						Types: []*Symbol{
+							&Symbol{"A", []*Symbol{&Symbol{Name: "int"}}},
+							&Symbol{"B", []*Symbol{
+								&Symbol{"C", []*Symbol{&Symbol{Name: "float32"}}},
+								&Symbol{"D", []*Symbol{&Symbol{Name: "string"}}},
 							}},
 						},
 					},

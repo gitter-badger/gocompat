@@ -5,14 +5,9 @@ import (
 	"go/token"
 )
 
-type Type struct {
-	Name string
-	Type []*Type
-}
-
 type Symbol struct {
 	Name  string
-	Types []*Type
+	Types []*Symbol
 }
 
 type Package struct {
@@ -44,24 +39,24 @@ func handleTypeSpec(node ast.Node, context *CompatContext) {
 		symbol := &Symbol{Name: typeSpec.Name.Name}
 		current.Exported = append(current.Exported, symbol)
 		context.CurrentSymbol = symbol
-		symbol.Types = handleType(typeSpec.Type)
+		symbol.Types = extractSymbols(typeSpec.Type)
 	}
 }
 
-func handleType(expr ast.Expr) []*Type {
+func extractSymbols(expr ast.Expr) []*Symbol {
 	switch t := expr.(type) {
 	case *ast.Ident:
-		return []*Type{&Type{Name: t.Name}}
+		return []*Symbol{&Symbol{Name: t.Name}}
 	case *ast.StructType:
-		types := []*Type{}
+		types := []*Symbol{}
 		for _, f := range t.Fields.List {
 			for _, n := range f.Names {
-				types = append(types, &Type{n.Name, handleType(f.Type)})
+				types = append(types, &Symbol{n.Name, extractSymbols(f.Type)})
 			}
 		}
 		return types
 	default:
-		return []*Type{}
+		return []*Symbol{}
 	}
 }
 
