@@ -21,7 +21,9 @@ func testTypes(
 			"\tActual: %v\n", expected.Name, actual.Name)
 	}
 
-	testTypes(t, expected.Type, actual.Type)
+	for index, _ := range expected.Type {
+		testTypes(t, expected.Type[index], actual.Type[index])
+	}
 }
 
 func testCompat(
@@ -69,7 +71,7 @@ func testCompat(
 	}
 }
 
-func Test1(t *testing.T) {
+func TestSimpleType(t *testing.T) {
 	source := `
 package p
 
@@ -95,7 +97,7 @@ type MyInt int
 	testCompat(t, source, expected)
 }
 
-func Test2(t *testing.T) {
+func TestStructType(t *testing.T) {
 	source := `
 package p
 
@@ -114,9 +116,45 @@ type MyInt struct {
 					&Symbol{
 						Name: "MyInt",
 						Types: []*Type{
-							&Type{"A", &Type{Name: "int"}},
-							&Type{"B", &Type{Name: "float32"}},
-							&Type{"C", &Type{Name: "string"}},
+							&Type{"A", []*Type{&Type{Name: "int"}}},
+							&Type{"B", []*Type{&Type{Name: "float32"}}},
+							&Type{"C", []*Type{&Type{Name: "string"}}},
+						},
+					},
+				},
+			},
+		},
+	}
+
+	testCompat(t, source, expected)
+}
+
+func TestNestedStructType(t *testing.T) {
+	source := `
+package p
+
+type MyInt struct {
+	A	int
+	B	struct {
+		C	float32
+		D	string
+	}
+}
+`
+
+	expected := CompatContext{
+		Packages: map[string]*Package{
+			"p": &Package{
+				Name: "p",
+				Exported: []*Symbol{
+					&Symbol{
+						Name: "MyInt",
+						Types: []*Type{
+							&Type{"A", []*Type{&Type{Name: "int"}}},
+							&Type{"B", []*Type{
+								&Type{"C", []*Type{&Type{Name: "float32"}}},
+								&Type{"D", []*Type{&Type{Name: "string"}}},
+							}},
 						},
 					},
 				},

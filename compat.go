@@ -7,7 +7,7 @@ import (
 
 type Type struct {
 	Name string
-	Type *Type
+	Type []*Type
 }
 
 type Symbol struct {
@@ -56,7 +56,7 @@ func handleType(expr ast.Expr) []*Type {
 		types := []*Type{}
 		for _, f := range t.Fields.List {
 			for _, n := range f.Names {
-				types = append(types, &Type{n.Name, handleType(f.Type)[0]})
+				types = append(types, &Type{n.Name, handleType(f.Type)})
 			}
 		}
 		return types
@@ -73,5 +73,4 @@ func ProcessFile(
 	visitor.Handle(handlePackage)
 	visitor.Handle(handleTypeSpec)
 	ast.Walk(visitor, file)
-	ast.Print(fileSet, file)
 }
