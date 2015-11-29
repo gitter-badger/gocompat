@@ -6,6 +6,24 @@ import (
 	"testing"
 )
 
+func testTypes(
+	t *testing.T,
+	expected *Type,
+	actual *Type) {
+
+	if expected == nil && actual == nil {
+		return
+	}
+
+	if expected.Name != actual.Name {
+		t.Errorf("Type name is mistaken.\n"+
+			"\tExpected: %v\n"+
+			"\tActual: %v\n", expected.Name, actual.Name)
+	}
+
+	testTypes(t, expected.Type, actual.Type)
+}
+
 func testCompat(
 	t *testing.T,
 	source string,
@@ -42,12 +60,7 @@ func testCompat(
 
 				for index, expectedType := range expectedSymbol.Types {
 					actualType := actualSymbol.Types[index]
-
-					if expectedType != actualType {
-						t.Errorf("Type name is mistaken.\n"+
-							"\tExpected: %v\n"+
-							"\tActual: %v\n", expectedType, actualType)
-					}
+					testTypes(t, expectedType, actualType)
 				}
 			}
 		} else {
@@ -69,8 +82,42 @@ type MyInt int
 				Name: "p",
 				Exported: []*Symbol{
 					&Symbol{
-						Name:  "MyInt",
-						Types: []string{"int"},
+						Name: "MyInt",
+						Types: []*Type{
+							&Type{Name: "int"},
+						},
+					},
+				},
+			},
+		},
+	}
+
+	testCompat(t, source, expected)
+}
+
+func Test2(t *testing.T) {
+	source := `
+package p
+
+type MyInt struct {
+	A	int
+	B	float32
+	C	string
+}
+`
+
+	expected := CompatContext{
+		Packages: map[string]*Package{
+			"p": &Package{
+				Name: "p",
+				Exported: []*Symbol{
+					&Symbol{
+						Name: "MyInt",
+						Types: []*Type{
+							&Type{"A", &Type{Name: "int"}},
+							&Type{"B", &Type{Name: "float32"}},
+							&Type{"C", &Type{Name: "string"}},
+						},
 					},
 				},
 			},

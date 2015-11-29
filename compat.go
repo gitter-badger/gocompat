@@ -5,9 +5,14 @@ import (
 	"go/token"
 )
 
+type Type struct {
+	Name string
+	Type *Type
+}
+
 type Symbol struct {
 	Name  string
-	Types []string
+	Types []*Type
 }
 
 type Package struct {
@@ -39,15 +44,24 @@ func handleTypeSpec(node ast.Node, context *CompatContext) {
 		symbol := &Symbol{Name: typeSpec.Name.Name}
 		current.Exported = append(current.Exported, symbol)
 		context.CurrentSymbol = symbol
-		handleType(typeSpec.Type, context)
+		symbol.Types = handleType(typeSpec.Type)
 	}
 }
 
-func handleType(expr ast.Expr, context *CompatContext) {
-	if object, ok := expr.(*ast.Ident); ok {
-		current := context.CurrentSymbol
-
-		current.Types = append(current.Types, object.Name)
+func handleType(expr ast.Expr) []*Type {
+	switch t := expr.(type) {
+	case *ast.Ident:
+		return []*Type{&Type{Name: t.Name}}
+	case *ast.StructType:
+		types := []*Type{}
+		for _, f := range t.Fields.List {
+			for _, n := range f.Names {
+				types = append(types, &Type{n.Name, handleType(f.Type)[0]})
+			}
+		}
+		return types
+	default:
+		return []*Type{}
 	}
 }
 
@@ -59,4 +73,5 @@ func ProcessFile(
 	visitor.Handle(handlePackage)
 	visitor.Handle(handleTypeSpec)
 	ast.Walk(visitor, file)
+	ast.Print(fileSet, file)
 }
