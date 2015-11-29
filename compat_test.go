@@ -79,7 +79,7 @@ func testCompat(
 	}
 }
 
-func TestSimpleType(t *testing.T) {
+func TestSimpleTypeDeclaration(t *testing.T) {
 	source := `
 package p
 
@@ -99,7 +99,7 @@ type MyInt int
 	testCompat(t, source, expected)
 }
 
-func TestStructType(t *testing.T) {
+func TestStructTypeDeclaration(t *testing.T) {
 	source := `
 package p
 
@@ -125,7 +125,7 @@ type MyInt struct {
 	testCompat(t, source, expected)
 }
 
-func TestNestedStructType(t *testing.T) {
+func TestNestedStructTypeDeclaration(t *testing.T) {
 	source := `
 package p
 
@@ -147,6 +147,29 @@ type MyInt struct {
 						sym("C", sym("float32")),
 						sym("D", sym("string")),
 					),
+				),
+			),
+		},
+	}
+
+	testCompat(t, source, expected)
+}
+
+func TestSimpleFuncDeclaration(t *testing.T) {
+	source := `
+package p
+
+func NameLength(name string) int {
+	return len(name)
+}
+`
+
+	expected := CompatContext{
+		Packages: map[string]*Package{
+			"p": pack("p",
+				sym("NameLength",
+					sym("string"),
+					sym("int"),
 				),
 			),
 		},

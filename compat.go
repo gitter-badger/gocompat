@@ -17,7 +17,6 @@ type Package struct {
 
 type CompatContext struct {
 	CurrentPackage *Package
-	CurrentSymbol  *Symbol
 	Packages       map[string]*Package
 }
 
@@ -38,8 +37,17 @@ func handleTypeSpec(node ast.Node, context *CompatContext) {
 
 		symbol := &Symbol{Name: typeSpec.Name.Name}
 		current.Exported = append(current.Exported, symbol)
-		context.CurrentSymbol = symbol
 		symbol.Types = extractSymbols(typeSpec.Type)
+	}
+}
+
+func handleFuncDecl(node ast.Node, context *CompatContext) {
+	if funcDecl, ok := node.(*ast.FuncDecl); ok {
+		current := context.CurrentPackage
+
+		symbol := &Symbol{Name: funcDecl.Name.Name}
+		current.Exported = append(current.Exported, symbol)
+		symbol.Types = extractSymbols(funcDecl.Type)
 	}
 }
 
@@ -55,6 +63,17 @@ func extractSymbols(expr ast.Expr) []*Symbol {
 			}
 		}
 		return types
+	case *ast.FuncType:
+		types := []*Symbol{}
+		for _, f := range t.Params.List {
+			for _, _ = range f.Names {
+				types = append(types, extractSymbols(f.Type)...)
+			}
+		}
+		for _, f := range t.Results.List {
+			types = append(types, extractSymbols(f.Type)...)
+		}
+		return types
 	default:
 		return []*Symbol{}
 	}
@@ -67,5 +86,6 @@ func ProcessFile(
 	visitor := NewVisitor(fileSet, file, context)
 	visitor.Handle(handlePackage)
 	visitor.Handle(handleTypeSpec)
+	visitor.Handle(handleFuncDecl)
 	ast.Walk(visitor, file)
 }
