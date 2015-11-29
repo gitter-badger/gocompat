@@ -177,3 +177,29 @@ func NameLength(name string) int {
 
 	testCompat(t, source, expected)
 }
+
+func TestComplexFuncDeclaration(t *testing.T) {
+	source := `
+package p
+
+func Something(a, b string, options ...int) (int, bool) {
+	return 42, true
+}
+`
+
+	expected := CompatContext{
+		Packages: map[string]*Package{
+			"p": pack("p",
+				sym("Something",
+					sym("string"),
+					sym("string"),
+					sym("...int"),
+					sym("int"),
+					sym("bool"),
+				),
+			),
+		},
+	}
+
+	testCompat(t, source, expected)
+}

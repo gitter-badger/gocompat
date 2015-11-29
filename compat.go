@@ -55,6 +55,12 @@ func extractSymbols(expr ast.Expr) []*Symbol {
 	switch t := expr.(type) {
 	case *ast.Ident:
 		return []*Symbol{&Symbol{Name: t.Name}}
+	case *ast.Ellipsis:
+		types := extractSymbols(t.Elt)
+		for index, _ := range types {
+			types[index].Name = "..." + types[index].Name
+		}
+		return types
 	case *ast.StructType:
 		types := []*Symbol{}
 		for _, f := range t.Fields.List {
