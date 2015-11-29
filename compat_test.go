@@ -102,6 +102,22 @@ type MyInt struct {
 	testCompat(t, source, expected)
 }
 
+func TestNotExportedTypeDeclaration(t *testing.T) {
+	source := `
+package p
+
+type myInt int
+`
+
+	expected := CompatContext{
+		Symbols: map[string]*Symbol{
+			"p": sym("p"),
+		},
+	}
+
+	testCompat(t, source, expected)
+}
+
 func TestSimpleFuncDeclaration(t *testing.T) {
 	source := `
 package p
@@ -145,6 +161,24 @@ func Something(a, b string, options ...int) (int, bool) {
 					sym("bool"),
 				),
 			),
+		},
+	}
+
+	testCompat(t, source, expected)
+}
+
+func TestNotExportedFunc(t *testing.T) {
+	source := `
+package p
+
+func something(a, b string, options ...int) (int, bool) {
+	return 42, true
+}
+`
+
+	expected := CompatContext{
+		Symbols: map[string]*Symbol{
+			"p": sym("p"),
 		},
 	}
 

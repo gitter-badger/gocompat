@@ -3,6 +3,7 @@ package main
 import (
 	"go/ast"
 	"go/token"
+	"unicode"
 )
 
 type Symbol struct {
@@ -13,6 +14,13 @@ type Symbol struct {
 type CompatContext struct {
 	CurrentSymbol *Symbol
 	Symbols       map[string]*Symbol
+}
+
+func isExported(name string) bool {
+	for _, r := range name {
+		return unicode.IsUpper(r)
+	}
+	return false
 }
 
 func handlePackage(node ast.Node, context *CompatContext) {
@@ -31,8 +39,10 @@ func handleTypeSpec(node ast.Node, context *CompatContext) {
 		current := context.CurrentSymbol
 
 		symbol := &Symbol{Name: typeSpec.Name.Name}
-		symbol.Symbols = extractSymbols(typeSpec.Type)
-		current.Symbols = append(current.Symbols, symbol)
+		if isExported(symbol.Name) {
+			symbol.Symbols = extractSymbols(typeSpec.Type)
+			current.Symbols = append(current.Symbols, symbol)
+		}
 	}
 }
 
@@ -41,8 +51,10 @@ func handleFuncDecl(node ast.Node, context *CompatContext) {
 		current := context.CurrentSymbol
 
 		symbol := &Symbol{Name: funcDecl.Name.Name}
-		symbol.Symbols = extractSymbols(funcDecl.Type)
-		current.Symbols = append(current.Symbols, symbol)
+		if isExported(symbol.Name) {
+			symbol.Symbols = extractSymbols(funcDecl.Type)
+			current.Symbols = append(current.Symbols, symbol)
+		}
 	}
 }
 
