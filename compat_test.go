@@ -6,10 +6,6 @@ import (
 	"testing"
 )
 
-func pack(name string, syms ...*Symbol) *Package {
-	return &Package{name, syms}
-}
-
 func sym(value string, subs ...*Symbol) *Symbol {
 	return &Symbol{value, subs}
 }
@@ -22,10 +18,10 @@ func testCompat(
 	fileSet := token.NewFileSet()
 	file, _ := parser.ParseFile(fileSet, "source.go", source, parser.ParseComments)
 
-	actual := &CompatContext{Packages: map[string]*Package{}}
+	actual := &CompatContext{Symbols: map[string]*Symbol{}}
 	ProcessFile(fileSet, file, actual)
 
-	if err := Compare(expected.Packages, actual.Packages); err != nil {
+	if err := Compare(expected.Symbols, actual.Symbols); err != nil {
 		t.Error(err)
 	}
 }
@@ -38,8 +34,8 @@ type MyInt int
 `
 
 	expected := CompatContext{
-		Packages: map[string]*Package{
-			"p": pack("p",
+		Symbols: map[string]*Symbol{
+			"p": sym("p",
 				sym("MyInt",
 					sym("int"),
 				),
@@ -62,8 +58,8 @@ type MyInt struct {
 `
 
 	expected := CompatContext{
-		Packages: map[string]*Package{
-			"p": pack("p",
+		Symbols: map[string]*Symbol{
+			"p": sym("p",
 				sym("MyInt",
 					sym("A", sym("int")),
 					sym("B", sym("float32")),
@@ -90,8 +86,8 @@ type MyInt struct {
 `
 
 	expected := CompatContext{
-		Packages: map[string]*Package{
-			"p": pack("p",
+		Symbols: map[string]*Symbol{
+			"p": sym("p",
 				sym("MyInt",
 					sym("A", sym("int")),
 					sym("B",
@@ -116,8 +112,8 @@ func NameLength(name string) int {
 `
 
 	expected := CompatContext{
-		Packages: map[string]*Package{
-			"p": pack("p",
+		Symbols: map[string]*Symbol{
+			"p": sym("p",
 				sym("NameLength",
 					sym("string"),
 					sym("int"),
@@ -139,8 +135,8 @@ func Something(a, b string, options ...int) (int, bool) {
 `
 
 	expected := CompatContext{
-		Packages: map[string]*Package{
-			"p": pack("p",
+		Symbols: map[string]*Symbol{
+			"p": sym("p",
 				sym("Something",
 					sym("string"),
 					sym("string"),

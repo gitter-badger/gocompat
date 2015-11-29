@@ -6,48 +6,43 @@ import (
 )
 
 type Symbol struct {
-	Name  string
-	Types []*Symbol
-}
-
-type Package struct {
-	Name     string
-	Exported []*Symbol
+	Name    string
+	Symbols []*Symbol
 }
 
 type CompatContext struct {
-	CurrentPackage *Package
-	Packages       map[string]*Package
+	CurrentSymbol *Symbol
+	Symbols       map[string]*Symbol
 }
 
 func handlePackage(node ast.Node, context *CompatContext) {
 	if file, ok := node.(*ast.File); ok {
 		packageName := file.Name.Name
 
-		if _, ok := context.Packages[packageName]; !ok {
-			context.Packages[packageName] = &Package{Name: packageName}
+		if _, ok := context.Symbols[packageName]; !ok {
+			context.Symbols[packageName] = &Symbol{Name: packageName}
 		}
-		context.CurrentPackage, _ = context.Packages[packageName]
+		context.CurrentSymbol, _ = context.Symbols[packageName]
 	}
 }
 
 func handleTypeSpec(node ast.Node, context *CompatContext) {
 	if typeSpec, ok := node.(*ast.TypeSpec); ok {
-		current := context.CurrentPackage
+		current := context.CurrentSymbol
 
 		symbol := &Symbol{Name: typeSpec.Name.Name}
-		current.Exported = append(current.Exported, symbol)
-		symbol.Types = extractSymbols(typeSpec.Type)
+		symbol.Symbols = extractSymbols(typeSpec.Type)
+		current.Symbols = append(current.Symbols, symbol)
 	}
 }
 
 func handleFuncDecl(node ast.Node, context *CompatContext) {
 	if funcDecl, ok := node.(*ast.FuncDecl); ok {
-		current := context.CurrentPackage
+		current := context.CurrentSymbol
 
 		symbol := &Symbol{Name: funcDecl.Name.Name}
-		current.Exported = append(current.Exported, symbol)
-		symbol.Types = extractSymbols(funcDecl.Type)
+		symbol.Symbols = extractSymbols(funcDecl.Type)
+		current.Symbols = append(current.Symbols, symbol)
 	}
 }
 

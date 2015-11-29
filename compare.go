@@ -14,7 +14,7 @@ func compareSymbols(a, b []*Symbol) error {
 			return errors.New("Different symbol name.")
 		}
 
-		if err := compareSymbols(sA.Types, sB.Types); err != nil {
+		if err := compareSymbols(sA.Symbols, sB.Symbols); err != nil {
 			return err
 		}
 	}
@@ -22,7 +22,7 @@ func compareSymbols(a, b []*Symbol) error {
 	return nil
 }
 
-func Compare(a, b map[string]*Package) error {
+func Compare(a, b map[string]*Symbol) error {
 	if len(a) != len(b) {
 		return errors.New("Different number of packages.")
 	}
@@ -34,7 +34,7 @@ func Compare(a, b map[string]*Package) error {
 			return errors.New("Different package name.")
 		}
 
-		if err := compareSymbols(pA.Exported, pB.Exported); err != nil {
+		if err := compareSymbols(pA.Symbols, pB.Symbols); err != nil {
 			return err
 		}
 	}
