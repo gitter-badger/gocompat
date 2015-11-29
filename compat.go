@@ -11,6 +11,10 @@ type Symbol struct {
 	Symbols []*Symbol
 }
 
+func Sym(name string, symbols ...*Symbol) *Symbol {
+	return &Symbol{Name: name, Symbols: symbols}
+}
+
 type CompatContext struct {
 	CurrentSymbol *Symbol
 	Symbols       map[string]*Symbol
@@ -59,37 +63,34 @@ func handleFuncDecl(node ast.Node, context *CompatContext) {
 }
 
 func extractSymbols(expr ast.Expr) []*Symbol {
+	symbols := []*Symbol{}
+
 	switch t := expr.(type) {
 	case *ast.Ident:
-		return []*Symbol{&Symbol{Name: t.Name}}
+		symbols = append(symbols, Sym(t.Name))
 	case *ast.Ellipsis:
-		types := extractSymbols(t.Elt)
-		for index, _ := range types {
-			types[index].Name = "..." + types[index].Name
+		symbols = extractSymbols(t.Elt)
+		for index, _ := range symbols {
+			symbols[index].Name = "..." + symbols[index].Name
 		}
-		return types
 	case *ast.StructType:
-		types := []*Symbol{}
 		for _, f := range t.Fields.List {
 			for _, n := range f.Names {
-				types = append(types, &Symbol{n.Name, extractSymbols(f.Type)})
+				symbols = append(symbols, Sym(n.Name, extractSymbols(f.Type)...))
 			}
 		}
-		return types
 	case *ast.FuncType:
-		types := []*Symbol{}
 		for _, f := range t.Params.List {
 			for _, _ = range f.Names {
-				types = append(types, extractSymbols(f.Type)...)
+				symbols = append(symbols, extractSymbols(f.Type)...)
 			}
 		}
 		for _, f := range t.Results.List {
-			types = append(types, extractSymbols(f.Type)...)
+			symbols = append(symbols, extractSymbols(f.Type)...)
 		}
-		return types
-	default:
-		return []*Symbol{}
 	}
+
+	return symbols
 }
 
 func ProcessFile(

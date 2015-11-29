@@ -6,10 +6,6 @@ import (
 	"testing"
 )
 
-func sym(value string, subs ...*Symbol) *Symbol {
-	return &Symbol{value, subs}
-}
-
 func testCompat(
 	t *testing.T,
 	source string,
@@ -35,9 +31,9 @@ type MyInt int
 
 	expected := CompatContext{
 		Symbols: map[string]*Symbol{
-			"p": sym("p",
-				sym("MyInt",
-					sym("int"),
+			"p": Sym("p",
+				Sym("MyInt",
+					Sym("int"),
 				),
 			),
 		},
@@ -59,11 +55,11 @@ type MyInt struct {
 
 	expected := CompatContext{
 		Symbols: map[string]*Symbol{
-			"p": sym("p",
-				sym("MyInt",
-					sym("A", sym("int")),
-					sym("B", sym("float32")),
-					sym("C", sym("string")),
+			"p": Sym("p",
+				Sym("MyInt",
+					Sym("A", Sym("int")),
+					Sym("B", Sym("float32")),
+					Sym("C", Sym("string")),
 				),
 			),
 		},
@@ -87,12 +83,12 @@ type MyInt struct {
 
 	expected := CompatContext{
 		Symbols: map[string]*Symbol{
-			"p": sym("p",
-				sym("MyInt",
-					sym("A", sym("int")),
-					sym("B",
-						sym("C", sym("float32")),
-						sym("D", sym("string")),
+			"p": Sym("p",
+				Sym("MyInt",
+					Sym("A", Sym("int")),
+					Sym("B",
+						Sym("C", Sym("float32")),
+						Sym("D", Sym("string")),
 					),
 				),
 			),
@@ -111,7 +107,7 @@ type myInt int
 
 	expected := CompatContext{
 		Symbols: map[string]*Symbol{
-			"p": sym("p"),
+			"p": Sym("p"),
 		},
 	}
 
@@ -129,10 +125,10 @@ func NameLength(name string) int {
 
 	expected := CompatContext{
 		Symbols: map[string]*Symbol{
-			"p": sym("p",
-				sym("NameLength",
-					sym("string"),
-					sym("int"),
+			"p": Sym("p",
+				Sym("NameLength",
+					Sym("string"),
+					Sym("int"),
 				),
 			),
 		},
@@ -152,13 +148,13 @@ func Something(a, b string, options ...int) (int, bool) {
 
 	expected := CompatContext{
 		Symbols: map[string]*Symbol{
-			"p": sym("p",
-				sym("Something",
-					sym("string"),
-					sym("string"),
-					sym("...int"),
-					sym("int"),
-					sym("bool"),
+			"p": Sym("p",
+				Sym("Something",
+					Sym("string"),
+					Sym("string"),
+					Sym("...int"),
+					Sym("int"),
+					Sym("bool"),
 				),
 			),
 		},
@@ -178,7 +174,7 @@ func something(a, b string, options ...int) (int, bool) {
 
 	expected := CompatContext{
 		Symbols: map[string]*Symbol{
-			"p": sym("p"),
+			"p": Sym("p"),
 		},
 	}
 
