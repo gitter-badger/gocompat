@@ -6,6 +6,14 @@ import (
 	"testing"
 )
 
+func pack(name string, syms ...*Symbol) *Package {
+	return &Package{name, syms}
+}
+
+func sym(value string, subs ...*Symbol) *Symbol {
+	return &Symbol{value, subs}
+}
+
 func testTypes(
 	t *testing.T,
 	expected *Symbol,
@@ -80,17 +88,11 @@ type MyInt int
 
 	expected := CompatContext{
 		Packages: map[string]*Package{
-			"p": &Package{
-				Name: "p",
-				Exported: []*Symbol{
-					&Symbol{
-						Name: "MyInt",
-						Types: []*Symbol{
-							&Symbol{Name: "int"},
-						},
-					},
-				},
-			},
+			"p": pack("p",
+				sym("MyInt",
+					sym("int"),
+				),
+			),
 		},
 	}
 
@@ -110,19 +112,13 @@ type MyInt struct {
 
 	expected := CompatContext{
 		Packages: map[string]*Package{
-			"p": &Package{
-				Name: "p",
-				Exported: []*Symbol{
-					&Symbol{
-						Name: "MyInt",
-						Types: []*Symbol{
-							&Symbol{"A", []*Symbol{&Symbol{Name: "int"}}},
-							&Symbol{"B", []*Symbol{&Symbol{Name: "float32"}}},
-							&Symbol{"C", []*Symbol{&Symbol{Name: "string"}}},
-						},
-					},
-				},
-			},
+			"p": pack("p",
+				sym("MyInt",
+					sym("A", sym("int")),
+					sym("B", sym("float32")),
+					sym("C", sym("string")),
+				),
+			),
 		},
 	}
 
@@ -144,21 +140,15 @@ type MyInt struct {
 
 	expected := CompatContext{
 		Packages: map[string]*Package{
-			"p": &Package{
-				Name: "p",
-				Exported: []*Symbol{
-					&Symbol{
-						Name: "MyInt",
-						Types: []*Symbol{
-							&Symbol{"A", []*Symbol{&Symbol{Name: "int"}}},
-							&Symbol{"B", []*Symbol{
-								&Symbol{"C", []*Symbol{&Symbol{Name: "float32"}}},
-								&Symbol{"D", []*Symbol{&Symbol{Name: "string"}}},
-							}},
-						},
-					},
-				},
-			},
+			"p": pack("p",
+				sym("MyInt",
+					sym("A", sym("int")),
+					sym("B",
+						sym("C", sym("float32")),
+						sym("D", sym("string")),
+					),
+				),
+			),
 		},
 	}
 
