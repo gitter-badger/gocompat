@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"go/parser"
 	"go/token"
 	"testing"
@@ -17,6 +18,7 @@ func testCompat(
 	actual := &CompatContext{Packages: map[string]*Package{}}
 	ProcessFile(fileSet, file, actual)
 
+	fmt.Printf("%v\n", actual.Packages["p"].Symbols["Something"])
 	if err := ComparePackages(expected.Packages, actual.Packages); err != nil {
 		t.Error(err)
 	}
@@ -173,6 +175,49 @@ func something(a, b string, options ...int) (int, bool) {
 	expected := CompatContext{
 		Packages: map[string]*Package{
 			"p": Pack("p", map[string]*Symbol{}),
+		},
+	}
+
+	testCompat(t, source, expected)
+}
+
+func TestFuncWithoutReturns(t *testing.T) {
+	source := `
+package p
+
+func Something(a, b string, options ...int) {
+}
+`
+
+	expected := CompatContext{
+		Packages: map[string]*Package{
+			"p": Pack("p", map[string]*Symbol{
+				"Something": Sym("Something",
+					Sym("string"),
+					Sym("string"),
+					Sym("...int")),
+			}),
+		},
+	}
+
+	testCompat(t, source, expected)
+}
+
+func TestFuncWithoutParams(t *testing.T) {
+	source := `
+package p
+
+func Something() int {
+	return 42
+}
+`
+
+	expected := CompatContext{
+		Packages: map[string]*Package{
+			"p": Pack("p", map[string]*Symbol{
+				"Something": Sym("Something",
+					Sym("int")),
+			}),
 		},
 	}
 

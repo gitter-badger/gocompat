@@ -94,8 +94,10 @@ func extractSymbols(expr ast.Expr) []*Symbol {
 				symbols = append(symbols, extractSymbols(f.Type)...)
 			}
 		}
-		for _, f := range t.Results.List {
-			symbols = append(symbols, extractSymbols(f.Type)...)
+		if t.Results != nil {
+			for _, f := range t.Results.List {
+				symbols = append(symbols, extractSymbols(f.Type)...)
+			}
 		}
 	}
 
