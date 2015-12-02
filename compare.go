@@ -2,19 +2,39 @@ package main
 
 import "errors"
 
-func compareSymbols(a, b []*Symbol) error {
-	if len(a) != len(b) {
-		return errors.New("Different number of symbols.")
+func packageMissingErr(packageName string) error {
+	return errors.New("Package " + packageName + " is missing.")
+}
+
+func corruptedPackageErr(packageName string) error {
+	return errors.New("Package " + packageName + " is corrupted.")
+}
+
+func definitionMissingErr(definitionName string) error {
+	return errors.New("Definition of " + definitionName + " is missing.")
+}
+
+func corruptedDefinitionErr(definitionName string) error {
+	return errors.New("Definition of " + definitionName + " is corrupted.")
+}
+
+func corruptedSymbolErr() error {
+	return errors.New("Corrupted symbol.")
+}
+
+func compareSymbols(older, newer []*Symbol) error {
+	if len(older) != len(newer) {
+		return corruptedSymbolErr()
 	}
 
-	for idx, sA := range a {
-		sB := b[idx]
+	for index, sOlder := range older {
+		sNewer := newer[index]
 
-		if sA.Name != sB.Name {
-			return errors.New("Different symbol name.")
+		if sNewer.Name != sOlder.Name {
+			return corruptedSymbolErr()
 		}
 
-		if err := compareSymbols(sA.Symbols, sB.Symbols); err != nil {
+		if err := compareSymbols(sOlder.Symbols, sNewer.Symbols); err != nil {
 			return err
 		}
 	}
@@ -22,19 +42,19 @@ func compareSymbols(a, b []*Symbol) error {
 	return nil
 }
 
-func compareDefinitions(a, b map[string]*Symbol) error {
-	if len(a) != len(b) {
-		return errors.New("Different number of definitions.")
-	}
+func compareDefinitions(older, newer map[string]*Symbol) error {
+	for dName, dOlder := range older {
+		dNewer, definitionExists := newer[dName]
 
-	for dName, dA := range a {
-		dB := b[dName]
-
-		if dA.Name != dB.Name {
-			return errors.New("Different definition name.")
+		if !definitionExists {
+			return definitionMissingErr(dName)
 		}
 
-		if err := compareSymbols(dA.Symbols, dB.Symbols); err != nil {
+		if dNewer.Name != dOlder.Name {
+			return corruptedDefinitionErr(dName)
+		}
+
+		if err := compareSymbols(dOlder.Symbols, dNewer.Symbols); err != nil {
 			return err
 		}
 	}
@@ -42,19 +62,19 @@ func compareDefinitions(a, b map[string]*Symbol) error {
 	return nil
 }
 
-func ComparePackages(a, b map[string]*Package) error {
-	if len(a) != len(b) {
-		return errors.New("Different number of packages.")
-	}
+func ComparePackages(older, newer map[string]*Package) error {
+	for pName, pOlder := range older {
+		pNewer, packageExists := newer[pName]
 
-	for pName, pA := range a {
-		pB := b[pName]
-
-		if pA.Name != pB.Name {
-			return errors.New("Different package name.")
+		if !packageExists {
+			return packageMissingErr(pName)
 		}
 
-		if err := compareDefinitions(pA.Symbols, pB.Symbols); err != nil {
+		if pNewer.Name != pOlder.Name {
+			return corruptedPackageErr(pName)
+		}
+
+		if err := compareDefinitions(pOlder.Symbols, pNewer.Symbols); err != nil {
 			return err
 		}
 	}
