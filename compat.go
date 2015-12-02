@@ -11,13 +11,22 @@ type Symbol struct {
 	Symbols []*Symbol
 }
 
+type Package struct {
+	Name    string
+	Symbols map[string]*Symbol
+}
+
+func Pack(name string, symbols map[string]*Symbol) *Package {
+	return &Package{name, symbols}
+}
+
 func Sym(name string, symbols ...*Symbol) *Symbol {
 	return &Symbol{Name: name, Symbols: symbols}
 }
 
 type CompatContext struct {
-	CurrentSymbol *Symbol
-	Symbols       map[string]*Symbol
+	CurrentPackage *Package
+	Packages       map[string]*Package
 }
 
 func isExported(name string) bool {
@@ -31,33 +40,33 @@ func handlePackage(node ast.Node, context *CompatContext) {
 	if file, ok := node.(*ast.File); ok {
 		packageName := file.Name.Name
 
-		if _, ok := context.Symbols[packageName]; !ok {
-			context.Symbols[packageName] = &Symbol{Name: packageName}
+		if _, ok := context.Packages[packageName]; !ok {
+			context.Packages[packageName] = Pack(packageName, map[string]*Symbol{})
 		}
-		context.CurrentSymbol, _ = context.Symbols[packageName]
+		context.CurrentPackage, _ = context.Packages[packageName]
 	}
 }
 
 func handleTypeSpec(node ast.Node, context *CompatContext) {
 	if typeSpec, ok := node.(*ast.TypeSpec); ok {
-		current := context.CurrentSymbol
+		current := context.CurrentPackage
 
 		symbol := &Symbol{Name: typeSpec.Name.Name}
 		if isExported(symbol.Name) {
 			symbol.Symbols = extractSymbols(typeSpec.Type)
-			current.Symbols = append(current.Symbols, symbol)
+			current.Symbols[symbol.Name] = symbol
 		}
 	}
 }
 
 func handleFuncDecl(node ast.Node, context *CompatContext) {
 	if funcDecl, ok := node.(*ast.FuncDecl); ok {
-		current := context.CurrentSymbol
+		current := context.CurrentPackage
 
 		symbol := &Symbol{Name: funcDecl.Name.Name}
 		if isExported(symbol.Name) {
 			symbol.Symbols = extractSymbols(funcDecl.Type)
-			current.Symbols = append(current.Symbols, symbol)
+			current.Symbols[symbol.Name] = symbol
 		}
 	}
 }

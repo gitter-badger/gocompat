@@ -14,10 +14,10 @@ func testCompat(
 	fileSet := token.NewFileSet()
 	file, _ := parser.ParseFile(fileSet, "source.go", source, parser.ParseComments)
 
-	actual := &CompatContext{Symbols: map[string]*Symbol{}}
+	actual := &CompatContext{Packages: map[string]*Package{}}
 	ProcessFile(fileSet, file, actual)
 
-	if err := Compare(expected.Symbols, actual.Symbols); err != nil {
+	if err := ComparePackages(expected.Packages, actual.Packages); err != nil {
 		t.Error(err)
 	}
 }
@@ -30,12 +30,10 @@ type MyInt int
 `
 
 	expected := CompatContext{
-		Symbols: map[string]*Symbol{
-			"p": Sym("p",
-				Sym("MyInt",
-					Sym("int"),
-				),
-			),
+		Packages: map[string]*Package{
+			"p": Pack("p", map[string]*Symbol{
+				"MyInt": Sym("MyInt", Sym("int")),
+			}),
 		},
 	}
 
@@ -54,14 +52,14 @@ type MyInt struct {
 `
 
 	expected := CompatContext{
-		Symbols: map[string]*Symbol{
-			"p": Sym("p",
-				Sym("MyInt",
+		Packages: map[string]*Package{
+			"p": Pack("p", map[string]*Symbol{
+				"MyInt": Sym("MyInt",
 					Sym("A", Sym("int")),
 					Sym("B", Sym("float32")),
 					Sym("C", Sym("string")),
 				),
-			),
+			}),
 		},
 	}
 
@@ -82,16 +80,16 @@ type MyInt struct {
 `
 
 	expected := CompatContext{
-		Symbols: map[string]*Symbol{
-			"p": Sym("p",
-				Sym("MyInt",
+		Packages: map[string]*Package{
+			"p": Pack("p", map[string]*Symbol{
+				"MyInt": Sym("MyInt",
 					Sym("A", Sym("int")),
 					Sym("B",
 						Sym("C", Sym("float32")),
 						Sym("D", Sym("string")),
 					),
 				),
-			),
+			}),
 		},
 	}
 
@@ -106,8 +104,8 @@ type myInt int
 `
 
 	expected := CompatContext{
-		Symbols: map[string]*Symbol{
-			"p": Sym("p"),
+		Packages: map[string]*Package{
+			"p": Pack("p", map[string]*Symbol{}),
 		},
 	}
 
@@ -124,13 +122,13 @@ func NameLength(name string) int {
 `
 
 	expected := CompatContext{
-		Symbols: map[string]*Symbol{
-			"p": Sym("p",
-				Sym("NameLength",
+		Packages: map[string]*Package{
+			"p": Pack("p", map[string]*Symbol{
+				"NameLength": Sym("NameLength",
 					Sym("string"),
 					Sym("int"),
 				),
-			),
+			}),
 		},
 	}
 
@@ -147,16 +145,16 @@ func Something(a, b string, options ...int) (int, bool) {
 `
 
 	expected := CompatContext{
-		Symbols: map[string]*Symbol{
-			"p": Sym("p",
-				Sym("Something",
+		Packages: map[string]*Package{
+			"p": Pack("p", map[string]*Symbol{
+				"Something": Sym("Something",
 					Sym("string"),
 					Sym("string"),
 					Sym("...int"),
 					Sym("int"),
 					Sym("bool"),
 				),
-			),
+			}),
 		},
 	}
 
@@ -173,8 +171,8 @@ func something(a, b string, options ...int) (int, bool) {
 `
 
 	expected := CompatContext{
-		Symbols: map[string]*Symbol{
-			"p": Sym("p"),
+		Packages: map[string]*Package{
+			"p": Pack("p", map[string]*Symbol{}),
 		},
 	}
 

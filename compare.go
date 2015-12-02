@@ -22,7 +22,27 @@ func compareSymbols(a, b []*Symbol) error {
 	return nil
 }
 
-func Compare(a, b map[string]*Symbol) error {
+func compareDefinitions(a, b map[string]*Symbol) error {
+	if len(a) != len(b) {
+		return errors.New("Different number of definitions.")
+	}
+
+	for dName, dA := range a {
+		dB := b[dName]
+
+		if dA.Name != dB.Name {
+			return errors.New("Different definition name.")
+		}
+
+		if err := compareSymbols(dA.Symbols, dB.Symbols); err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+func ComparePackages(a, b map[string]*Package) error {
 	if len(a) != len(b) {
 		return errors.New("Different number of packages.")
 	}
@@ -34,7 +54,7 @@ func Compare(a, b map[string]*Symbol) error {
 			return errors.New("Different package name.")
 		}
 
-		if err := compareSymbols(pA.Symbols, pB.Symbols); err != nil {
+		if err := compareDefinitions(pA.Symbols, pB.Symbols); err != nil {
 			return err
 		}
 	}
