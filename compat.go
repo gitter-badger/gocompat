@@ -136,4 +136,5 @@ func ProcessFile(
 	visitor.Handle(handleFuncDecl)
 	visitor.Handle(handleGenDecl)
 	ast.Walk(visitor, file)
+	ast.Print(fileSet, file)
 }

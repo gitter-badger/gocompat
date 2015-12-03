@@ -277,3 +277,59 @@ var S string = "something"
 
 	testCompat(t, source, expected)
 }
+
+func TestExportedConst(t *testing.T) {
+	source := `
+package p
+
+const A int = 5
+`
+
+	expected := CompatContext{
+		Packages: map[string]*Package{
+			"p": Pack("p", map[string]*Symbol{
+				"A": Sym("A", Sym("int")),
+			}),
+		},
+	}
+
+	testCompat(t, source, expected)
+}
+
+func TestNotExportedConst(t *testing.T) {
+	source := `
+package p
+
+const a int = 5
+`
+
+	expected := CompatContext{
+		Packages: map[string]*Package{
+			"p": Pack("p", map[string]*Symbol{}),
+		},
+	}
+
+	testCompat(t, source, expected)
+}
+
+func TestComplexConst(t *testing.T) {
+	source := `
+package p
+
+const A, B, c, D int = 5
+const S string = "something"
+`
+
+	expected := CompatContext{
+		Packages: map[string]*Package{
+			"p": Pack("p", map[string]*Symbol{
+				"A": Sym("A", Sym("int")),
+				"B": Sym("B", Sym("int")),
+				"D": Sym("D", Sym("int")),
+				"S": Sym("S", Sym("string")),
+			}),
+		},
+	}
+
+	testCompat(t, source, expected)
+}
