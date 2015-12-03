@@ -1,4 +1,5 @@
-# gocompat
+# gocompat [![Build Status](https://travis-ci.org/s2gatev/gocompat.svg?branch=master)](https://travis-ci.org/s2gatev/gocompat) [![Coverage Status](https://coveralls.io/repos/s2gatev/gocompat/badge.svg?branch=master&service=github)](https://coveralls.io/github/s2gatev/gocompat?branch=master)
+
 Backwards compatibility checker for Go APIs.
 
 ## Introduction
