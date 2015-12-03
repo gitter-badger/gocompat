@@ -196,3 +196,41 @@ type A struct {}
 
 	testCompare(t, older, newer, true)
 }
+
+func TestFuncParamToResult(t *testing.T) {
+	older := `
+package p
+
+func A(a int) {
+}
+`
+
+	newer := `
+package p
+
+func A() int {
+	return 42
+}
+`
+
+	testCompare(t, older, newer, true)
+}
+
+func TestFuncResultToParam(t *testing.T) {
+	older := `
+package p
+
+func A() (string, int) {
+	return "", 42
+}
+`
+
+	newer := `
+package p
+
+func A(a string, b int) {
+}
+`
+
+	testCompare(t, older, newer, true)
+}

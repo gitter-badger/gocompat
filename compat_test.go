@@ -125,8 +125,10 @@ func NameLength(name string) int {
 		Packages: map[string]*Package{
 			"p": Pack("p", map[string]*Symbol{
 				"NameLength": Sym("func", Sym("NameLength",
-					Sym("string"),
-					Sym("int"),
+					Sym("params",
+						Sym("string")),
+					Sym("results",
+						Sym("int")),
 				)),
 			}),
 		},
@@ -148,11 +150,13 @@ func Something(a, b string, options ...int) (int, bool) {
 		Packages: map[string]*Package{
 			"p": Pack("p", map[string]*Symbol{
 				"Something": Sym("func", Sym("Something",
-					Sym("string"),
-					Sym("string"),
-					Sym("...int"),
-					Sym("int"),
-					Sym("bool"),
+					Sym("params",
+						Sym("string"),
+						Sym("string"),
+						Sym("...int")),
+					Sym("results",
+						Sym("int"),
+						Sym("bool")),
 				)),
 			}),
 		},
@@ -179,7 +183,7 @@ func something(a, b string, options ...int) (int, bool) {
 	testCompat(t, source, expected)
 }
 
-func TestFuncWithoutReturns(t *testing.T) {
+func TestFuncWithoutResults(t *testing.T) {
 	source := `
 package p
 
@@ -191,9 +195,11 @@ func Something(a, b string, options ...int) {
 		Packages: map[string]*Package{
 			"p": Pack("p", map[string]*Symbol{
 				"Something": Sym("func", Sym("Something",
-					Sym("string"),
-					Sym("string"),
-					Sym("...int"))),
+					Sym("params",
+						Sym("string"),
+						Sym("string"),
+						Sym("...int")),
+					Sym("results"))),
 			}),
 		},
 	}
@@ -214,7 +220,9 @@ func Something() int {
 		Packages: map[string]*Package{
 			"p": Pack("p", map[string]*Symbol{
 				"Something": Sym("func", Sym("Something",
-					Sym("int"))),
+					Sym("params"),
+					Sym("results",
+						Sym("int")))),
 			}),
 		},
 	}

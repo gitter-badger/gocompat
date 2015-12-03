@@ -72,16 +72,21 @@ func extractSymbols(expr ast.Expr) []*Symbol {
 			}
 		}
 	case *ast.FuncType:
+		var paramSymbols []*Symbol
 		for _, f := range t.Params.List {
 			for _, _ = range f.Names {
-				symbols = append(symbols, extractSymbols(f.Type)...)
+				paramSymbols = append(paramSymbols, extractSymbols(f.Type)...)
 			}
 		}
+		symbols = append(symbols, Sym("params", paramSymbols...))
+
+		var resultSymbols []*Symbol
 		if t.Results != nil {
 			for _, f := range t.Results.List {
-				symbols = append(symbols, extractSymbols(f.Type)...)
+				resultSymbols = append(resultSymbols, extractSymbols(f.Type)...)
 			}
 		}
+		symbols = append(symbols, Sym("results", resultSymbols...))
 	}
 
 	return symbols
