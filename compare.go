@@ -22,6 +22,18 @@ func corruptedSymbolErr() error {
 	return errors.New("Corrupted symbol.")
 }
 
+func compareSymbolNames(oldName, newName string) bool {
+	if oldName == newName {
+		return true
+	}
+
+	if "..."+oldName == newName {
+		return true
+	}
+
+	return false
+}
+
 func compareSymbols(older, newer []*Symbol) error {
 	if len(older) != len(newer) {
 		return corruptedSymbolErr()
@@ -30,7 +42,7 @@ func compareSymbols(older, newer []*Symbol) error {
 	for index, sOlder := range older {
 		sNewer := newer[index]
 
-		if sNewer.Name != sOlder.Name {
+		if !compareSymbolNames(sOlder.Name, sNewer.Name) {
 			return corruptedSymbolErr()
 		}
 
