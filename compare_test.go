@@ -10,7 +10,7 @@ func getPackages(source string) map[string]*Package {
 	fileSet := token.NewFileSet()
 	file, _ := parser.ParseFile(fileSet, "source.go", source, parser.ParseComments)
 
-	context := &CompatContext{Packages: map[string]*Package{}}
+	context := &InterfaceContext{Packages: map[string]*Package{}}
 	ProcessFile(fileSet, file, context)
 
 	return context.Packages

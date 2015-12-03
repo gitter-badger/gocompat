@@ -17,7 +17,7 @@ const compatIndexFileName = ".gocompat"
 
 var goFilePattern = regexp.MustCompile(`^.*\.go$`)
 
-var context = &CompatContext{Packages: map[string]*Package{}}
+var context = &InterfaceContext{Packages: map[string]*Package{}}
 
 // Flags.
 var (

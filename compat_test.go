@@ -9,12 +9,12 @@ import (
 func testCompat(
 	t *testing.T,
 	source string,
-	expected CompatContext) {
+	expected InterfaceContext) {
 
 	fileSet := token.NewFileSet()
 	file, _ := parser.ParseFile(fileSet, "source.go", source, parser.ParseComments)
 
-	actual := &CompatContext{Packages: map[string]*Package{}}
+	actual := &InterfaceContext{Packages: map[string]*Package{}}
 	ProcessFile(fileSet, file, actual)
 
 	if err := ComparePackages(expected.Packages, actual.Packages); err != nil {
@@ -29,7 +29,7 @@ package p
 type MyInt int
 `
 
-	expected := CompatContext{
+	expected := InterfaceContext{
 		Packages: map[string]*Package{
 			"p": Pack("p", map[string]*Symbol{
 				"MyInt": Sym("MyInt", Sym("int")),
@@ -51,7 +51,7 @@ type MyInt struct {
 }
 `
 
-	expected := CompatContext{
+	expected := InterfaceContext{
 		Packages: map[string]*Package{
 			"p": Pack("p", map[string]*Symbol{
 				"MyInt": Sym("MyInt",
@@ -79,7 +79,7 @@ type MyInt struct {
 }
 `
 
-	expected := CompatContext{
+	expected := InterfaceContext{
 		Packages: map[string]*Package{
 			"p": Pack("p", map[string]*Symbol{
 				"MyInt": Sym("MyInt",
@@ -103,7 +103,7 @@ package p
 type myInt int
 `
 
-	expected := CompatContext{
+	expected := InterfaceContext{
 		Packages: map[string]*Package{
 			"p": Pack("p", map[string]*Symbol{}),
 		},
@@ -121,7 +121,7 @@ func NameLength(name string) int {
 }
 `
 
-	expected := CompatContext{
+	expected := InterfaceContext{
 		Packages: map[string]*Package{
 			"p": Pack("p", map[string]*Symbol{
 				"NameLength": Sym("NameLength",
@@ -144,7 +144,7 @@ func Something(a, b string, options ...int) (int, bool) {
 }
 `
 
-	expected := CompatContext{
+	expected := InterfaceContext{
 		Packages: map[string]*Package{
 			"p": Pack("p", map[string]*Symbol{
 				"Something": Sym("Something",
@@ -170,7 +170,7 @@ func something(a, b string, options ...int) (int, bool) {
 }
 `
 
-	expected := CompatContext{
+	expected := InterfaceContext{
 		Packages: map[string]*Package{
 			"p": Pack("p", map[string]*Symbol{}),
 		},
@@ -187,7 +187,7 @@ func Something(a, b string, options ...int) {
 }
 `
 
-	expected := CompatContext{
+	expected := InterfaceContext{
 		Packages: map[string]*Package{
 			"p": Pack("p", map[string]*Symbol{
 				"Something": Sym("Something",
@@ -210,7 +210,7 @@ func Something() int {
 }
 `
 
-	expected := CompatContext{
+	expected := InterfaceContext{
 		Packages: map[string]*Package{
 			"p": Pack("p", map[string]*Symbol{
 				"Something": Sym("Something",
@@ -229,7 +229,7 @@ package p
 var A int = 5
 `
 
-	expected := CompatContext{
+	expected := InterfaceContext{
 		Packages: map[string]*Package{
 			"p": Pack("p", map[string]*Symbol{
 				"A": Sym("A", Sym("int")),
@@ -247,7 +247,7 @@ package p
 var a int = 5
 `
 
-	expected := CompatContext{
+	expected := InterfaceContext{
 		Packages: map[string]*Package{
 			"p": Pack("p", map[string]*Symbol{}),
 		},
@@ -265,7 +265,7 @@ var S string = "something"
 var F, G = "answer", 42
 `
 
-	expected := CompatContext{
+	expected := InterfaceContext{
 		Packages: map[string]*Package{
 			"p": Pack("p", map[string]*Symbol{
 				"A": Sym("A", Sym("int")),
@@ -288,7 +288,7 @@ package p
 const A int = 5
 `
 
-	expected := CompatContext{
+	expected := InterfaceContext{
 		Packages: map[string]*Package{
 			"p": Pack("p", map[string]*Symbol{
 				"A": Sym("A", Sym("int")),
@@ -306,7 +306,7 @@ package p
 const a int = 5
 `
 
-	expected := CompatContext{
+	expected := InterfaceContext{
 		Packages: map[string]*Package{
 			"p": Pack("p", map[string]*Symbol{}),
 		},
@@ -324,7 +324,7 @@ const S string = "something"
 const F, G = "answer", 42
 `
 
-	expected := CompatContext{
+	expected := InterfaceContext{
 		Packages: map[string]*Package{
 			"p": Pack("p", map[string]*Symbol{
 				"A": Sym("A", Sym("int")),

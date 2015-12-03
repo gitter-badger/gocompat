@@ -5,25 +5,24 @@ import (
 	"go/token"
 )
 
-// AstVisitor visits the parts of an abstract syntax tree handling them in specific ways.
-type AstVisitor struct {
+// ContextPassingVisitor visits the nodes of an abstract syntax tree
+// handling them in specific ways, passing a context object.
+type ContextPassingVisitor struct {
 	FileSet  *token.FileSet
 	AST      *ast.File
-	Context  *CompatContext
-	Handlers []func(ast.Node, *CompatContext)
+	Context  interface{}
+	Handlers []func(ast.Node, interface{})
 }
 
-func NewVisitor(fileSet *token.FileSet, ast *ast.File, context *CompatContext) *AstVisitor {
-	return &AstVisitor{fileSet, ast, context, nil}
+// Handle assings a new handler to the visitor.
+func (cpv *ContextPassingVisitor) Handle(handler func(ast.Node, interface{})) {
+	cpv.Handlers = append(cpv.Handlers, handler)
 }
 
-func (v *AstVisitor) Handle(handler func(ast.Node, *CompatContext)) {
-	v.Handlers = append(v.Handlers, handler)
-}
-
-func (v *AstVisitor) Visit(node ast.Node) ast.Visitor {
-	for _, handler := range v.Handlers {
-		handler(node, v.Context)
+// Visit traverses the ast applying visitor's handlers to each node in the order they are defined.
+func (cpv *ContextPassingVisitor) Visit(node ast.Node) ast.Visitor {
+	for _, handler := range cpv.Handlers {
+		handler(node, cpv.Context)
 	}
-	return v
+	return cpv
 }

@@ -24,11 +24,14 @@ func Sym(name string, symbols ...*Symbol) *Symbol {
 	return &Symbol{Name: name, Symbols: symbols}
 }
 
-type CompatContext struct {
+// InterfaceContext is passed to the AST visitor in order to keep track the symbols
+// part of the program interface.
+type InterfaceContext struct {
 	CurrentPackage *Package
 	Packages       map[string]*Package
 }
 
+// isExporeted returns if a given name should be public or private.
 func isExported(name string) bool {
 	for _, r := range name {
 		return unicode.IsUpper(r)
@@ -36,73 +39,7 @@ func isExported(name string) bool {
 	return false
 }
 
-func handlePackage(node ast.Node, context *CompatContext) {
-	if file, ok := node.(*ast.File); ok {
-		packageName := file.Name.Name
-
-		if _, ok := context.Packages[packageName]; !ok {
-			context.Packages[packageName] = Pack(packageName, map[string]*Symbol{})
-		}
-		context.CurrentPackage, _ = context.Packages[packageName]
-	}
-}
-
-func handleTypeSpec(node ast.Node, context *CompatContext) {
-	if typeSpec, ok := node.(*ast.TypeSpec); ok {
-		current := context.CurrentPackage
-
-		symbol := &Symbol{Name: typeSpec.Name.Name}
-		if isExported(symbol.Name) {
-			symbol.Symbols = extractSymbols(typeSpec.Type)
-			current.Symbols[symbol.Name] = symbol
-		}
-	}
-}
-
-func handleFuncDecl(node ast.Node, context *CompatContext) {
-	if funcDecl, ok := node.(*ast.FuncDecl); ok {
-		current := context.CurrentPackage
-
-		symbol := &Symbol{Name: funcDecl.Name.Name}
-		if isExported(symbol.Name) {
-			symbol.Symbols = extractSymbols(funcDecl.Type)
-			current.Symbols[symbol.Name] = symbol
-		}
-	}
-}
-
-func handleSpec(spec ast.Node, context *CompatContext) {
-	if valueSpec, ok := spec.(*ast.ValueSpec); ok {
-		current := context.CurrentPackage
-
-		if valueSpec.Type != nil {
-			typeSymbols := extractSymbols(valueSpec.Type)
-			for _, name := range valueSpec.Names {
-				symbol := &Symbol{Name: name.Name, Symbols: typeSymbols}
-				if isExported(symbol.Name) {
-					current.Symbols[symbol.Name] = symbol
-				}
-			}
-		} else {
-			for index, name := range valueSpec.Names {
-				typeSymbols := extractSymbols(valueSpec.Values[index])
-				symbol := &Symbol{Name: name.Name, Symbols: typeSymbols}
-				if isExported(symbol.Name) {
-					current.Symbols[symbol.Name] = symbol
-				}
-			}
-		}
-	}
-}
-
-func handleGenDecl(node ast.Node, context *CompatContext) {
-	if genDecl, ok := node.(*ast.GenDecl); ok {
-		for _, spec := range genDecl.Specs {
-			handleSpec(spec, context)
-		}
-	}
-}
-
+// kindToType transforms Go token kind to type name.
 func kindToType(kind token.Token) string {
 	switch kind.String() {
 	case "STRING":
@@ -114,6 +51,7 @@ func kindToType(kind token.Token) string {
 	}
 }
 
+// extractSymbols returns the interface-specific symbols part of an AST expression.
 func extractSymbols(expr ast.Expr) []*Symbol {
 	symbols := []*Symbol{}
 
@@ -149,14 +87,89 @@ func extractSymbols(expr ast.Expr) []*Symbol {
 	return symbols
 }
 
+func handlePackage(node ast.Node, context interface{}) {
+	if file, ok := node.(*ast.File); ok {
+		context, _ := context.(*InterfaceContext)
+		packageName := file.Name.Name
+
+		if _, ok := context.Packages[packageName]; !ok {
+			context.Packages[packageName] = Pack(packageName, map[string]*Symbol{})
+		}
+		context.CurrentPackage, _ = context.Packages[packageName]
+	}
+}
+
+func handleTypeSpec(node ast.Node, context interface{}) {
+	if typeSpec, ok := node.(*ast.TypeSpec); ok {
+		context, _ := context.(*InterfaceContext)
+		current := context.CurrentPackage
+
+		symbol := &Symbol{Name: typeSpec.Name.Name}
+		if isExported(symbol.Name) {
+			symbol.Symbols = extractSymbols(typeSpec.Type)
+			current.Symbols[symbol.Name] = symbol
+		}
+	}
+}
+
+func handleFuncDecl(node ast.Node, context interface{}) {
+	if funcDecl, ok := node.(*ast.FuncDecl); ok {
+		context, _ := context.(*InterfaceContext)
+		current := context.CurrentPackage
+
+		symbol := &Symbol{Name: funcDecl.Name.Name}
+		if isExported(symbol.Name) {
+			symbol.Symbols = extractSymbols(funcDecl.Type)
+			current.Symbols[symbol.Name] = symbol
+		}
+	}
+}
+
+func handleSpec(spec ast.Node, context interface{}) {
+	if valueSpec, ok := spec.(*ast.ValueSpec); ok {
+		context, _ := context.(*InterfaceContext)
+		current := context.CurrentPackage
+
+		if valueSpec.Type != nil {
+			typeSymbols := extractSymbols(valueSpec.Type)
+			for _, name := range valueSpec.Names {
+				symbol := &Symbol{Name: name.Name, Symbols: typeSymbols}
+				if isExported(symbol.Name) {
+					current.Symbols[symbol.Name] = symbol
+				}
+			}
+		} else {
+			for index, name := range valueSpec.Names {
+				typeSymbols := extractSymbols(valueSpec.Values[index])
+				symbol := &Symbol{Name: name.Name, Symbols: typeSymbols}
+				if isExported(symbol.Name) {
+					current.Symbols[symbol.Name] = symbol
+				}
+			}
+		}
+	}
+}
+
+func handleGenDecl(node ast.Node, context interface{}) {
+	if genDecl, ok := node.(*ast.GenDecl); ok {
+		context, _ := context.(*InterfaceContext)
+
+		for _, spec := range genDecl.Specs {
+			handleSpec(spec, context)
+		}
+	}
+}
+
 func ProcessFile(
 	fileSet *token.FileSet,
 	file *ast.File,
-	context *CompatContext) {
-	visitor := NewVisitor(fileSet, file, context)
+	context *InterfaceContext) {
+
+	visitor := &ContextPassingVisitor{FileSet: fileSet, AST: file, Context: context}
 	visitor.Handle(handlePackage)
 	visitor.Handle(handleTypeSpec)
 	visitor.Handle(handleFuncDecl)
 	visitor.Handle(handleGenDecl)
+
 	ast.Walk(visitor, file)
 }
