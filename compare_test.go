@@ -6,14 +6,16 @@ import (
 	"testing"
 )
 
-func getPackages(source string) map[string]*Package {
+func parse(source string) *Application {
 	fileSet := token.NewFileSet()
 	file, _ := parser.ParseFile(fileSet, "source.go", source, parser.ParseComments)
 
-	context := &InterfaceContext{Packages: map[string]*Package{}}
+	context := &InterfaceContext{
+		Application: &Application{Packages: map[string]*Package{}},
+	}
 	ProcessFile(fileSet, file, context)
 
-	return context.Packages
+	return context.Application
 }
 
 func testCompare(
@@ -21,11 +23,10 @@ func testCompare(
 	older, newer string,
 	shouldHaveError bool) {
 
-	err := ComparePackages(getPackages(older), getPackages(newer))
-	hasError := (err != nil)
+	ok := parse(older).Compare(parse(newer))
 
-	if hasError != shouldHaveError {
-		t.Error("Wrong test.")
+	if ok == shouldHaveError {
+		t.Error("Error in compare test.")
 	}
 }
 

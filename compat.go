@@ -6,16 +6,6 @@ import (
 	"unicode"
 )
 
-type Symbol struct {
-	Name    string
-	Symbols []*Symbol
-}
-
-type Package struct {
-	Name    string
-	Symbols map[string]*Symbol
-}
-
 func Pack(name string, symbols map[string]*Symbol) *Package {
 	return &Package{name, symbols}
 }
@@ -28,7 +18,7 @@ func Sym(name string, symbols ...*Symbol) *Symbol {
 // part of the program interface.
 type InterfaceContext struct {
 	CurrentPackage *Package
-	Packages       map[string]*Package
+	Application    *Application
 }
 
 // isExporeted returns if a given name should be public or private.
@@ -122,10 +112,10 @@ func handlePackage(node ast.Node, context interface{}) {
 		context, _ := context.(*InterfaceContext)
 		packageName := file.Name.Name
 
-		if _, ok := context.Packages[packageName]; !ok {
-			context.Packages[packageName] = Pack(packageName, map[string]*Symbol{})
+		if _, ok := context.Application.Packages[packageName]; !ok {
+			context.Application.Packages[packageName] = Pack(packageName, map[string]*Symbol{})
 		}
-		context.CurrentPackage, _ = context.Packages[packageName]
+		context.CurrentPackage, _ = context.Application.Packages[packageName]
 	}
 }
 

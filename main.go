@@ -17,7 +17,9 @@ const compatIndexFileName = ".gocompat"
 
 var goFilePattern = regexp.MustCompile(`^.*\.go$`)
 
-var context = &InterfaceContext{Packages: map[string]*Package{}}
+var context = &InterfaceContext{
+	Application: &Application{Packages: map[string]*Package{}},
+}
 
 // Flags.
 var (
@@ -49,11 +51,11 @@ func main() {
 
 	// If index is present compare current API to the previous version.
 	if content, err := ioutil.ReadFile(compatIndexFileName); err == nil {
-		older := map[string]*Package{}
+		older := &Application{}
 		decoder := gob.NewDecoder(bytes.NewReader([]byte(content)))
 
-		if err = decoder.Decode(&older); err == nil {
-			if err := ComparePackages(older, context.Packages); err == nil {
+		if err = decoder.Decode(older); err == nil {
+			if ok := older.Compare(context.Application); ok {
 				exitMessage = "OK"
 			} else {
 				exitMessage = "Not OK"
@@ -61,7 +63,7 @@ func main() {
 				shouldStoreIndex = false
 			}
 		} else {
-			fmt.Println("Error when decoding compatibility index.", err)
+			fmt.Println("Error when decoding compatibility index.")
 		}
 	}
 
@@ -69,7 +71,7 @@ func main() {
 	if shouldStoreIndex || *forceStore {
 		buffer := bytes.Buffer{}
 		encoder := gob.NewEncoder(&buffer)
-		err := encoder.Encode(context.Packages)
+		err := encoder.Encode(context.Application)
 		if err != nil {
 			fmt.Println("Error when encoding compatibility index.", err)
 		}
