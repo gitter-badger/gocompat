@@ -20,8 +20,6 @@ Execute `gocompat` inside your project directory. You can modify the command by 
 ## TODO
 
 A list of things that should be taken care of:
-* Handle methods for structs.
-* Handle interfaces and their methods.
 * Handle nested packages property. `./a/test` is different thank `./b/test`.
 * Handle interface conversion - stricker to more relaxed interface should not break compatibility.
 
