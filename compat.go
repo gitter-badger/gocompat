@@ -75,11 +75,21 @@ func handleSpec(spec ast.Node, context *CompatContext) {
 	if valueSpec, ok := spec.(*ast.ValueSpec); ok {
 		current := context.CurrentPackage
 
-		typeSymbols := extractSymbols(valueSpec.Type)
-		for _, name := range valueSpec.Names {
-			symbol := &Symbol{Name: name.Name, Symbols: typeSymbols}
-			if isExported(symbol.Name) {
-				current.Symbols[symbol.Name] = symbol
+		if valueSpec.Type != nil {
+			typeSymbols := extractSymbols(valueSpec.Type)
+			for _, name := range valueSpec.Names {
+				symbol := &Symbol{Name: name.Name, Symbols: typeSymbols}
+				if isExported(symbol.Name) {
+					current.Symbols[symbol.Name] = symbol
+				}
+			}
+		} else {
+			for index, name := range valueSpec.Names {
+				typeSymbols := extractSymbols(valueSpec.Values[index])
+				symbol := &Symbol{Name: name.Name, Symbols: typeSymbols}
+				if isExported(symbol.Name) {
+					current.Symbols[symbol.Name] = symbol
+				}
 			}
 		}
 	}
@@ -93,10 +103,23 @@ func handleGenDecl(node ast.Node, context *CompatContext) {
 	}
 }
 
+func kindToType(kind token.Token) string {
+	switch kind.String() {
+	case "STRING":
+		return "string"
+	case "INT":
+		return "int"
+	default:
+		return ""
+	}
+}
+
 func extractSymbols(expr ast.Expr) []*Symbol {
 	symbols := []*Symbol{}
 
 	switch t := expr.(type) {
+	case *ast.BasicLit:
+		symbols = append(symbols, Sym(kindToType(t.Kind)))
 	case *ast.Ident:
 		symbols = append(symbols, Sym(t.Name))
 	case *ast.Ellipsis:
@@ -136,5 +159,5 @@ func ProcessFile(
 	visitor.Handle(handleFuncDecl)
 	visitor.Handle(handleGenDecl)
 	ast.Walk(visitor, file)
-	ast.Print(fileSet, file)
+	//ast.Print(fileSet, file)
 }

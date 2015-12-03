@@ -262,6 +262,7 @@ package p
 
 var A, B, c, D int = 5
 var S string = "something"
+var F, G = "answer", 42
 `
 
 	expected := CompatContext{
@@ -271,6 +272,8 @@ var S string = "something"
 				"B": Sym("B", Sym("int")),
 				"D": Sym("D", Sym("int")),
 				"S": Sym("S", Sym("string")),
+				"F": Sym("F", Sym("string")),
+				"G": Sym("G", Sym("int")),
 			}),
 		},
 	}
@@ -318,6 +321,7 @@ package p
 
 const A, B, c, D int = 5
 const S string = "something"
+const F, G = "answer", 42
 `
 
 	expected := CompatContext{
@@ -327,6 +331,8 @@ const S string = "something"
 				"B": Sym("B", Sym("int")),
 				"D": Sym("D", Sym("int")),
 				"S": Sym("S", Sym("string")),
+				"F": Sym("F", Sym("string")),
+				"G": Sym("G", Sym("int")),
 			}),
 		},
 	}
