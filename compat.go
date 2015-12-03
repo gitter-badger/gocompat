@@ -52,7 +52,7 @@ func kindToType(kind token.Token) string {
 }
 
 // extractSymbols returns the interface-specific symbols part of an AST expression.
-func extractSymbols(expr ast.Expr) []*Symbol {
+func extractSymbols(expr ast.Node) []*Symbol {
 	symbols := []*Symbol{}
 
 	switch t := expr.(type) {
@@ -71,6 +71,22 @@ func extractSymbols(expr ast.Expr) []*Symbol {
 				symbols = append(symbols, Sym(n.Name, extractSymbols(f.Type)...))
 			}
 		}
+	case *ast.StarExpr:
+		symbols = extractSymbols(t.X)
+		for index, _ := range symbols {
+			symbols[index].Name = "*" + symbols[index].Name
+		}
+	case *ast.FuncDecl:
+		if t.Recv != nil {
+			var recvSymbols []*Symbol
+			for _, f := range t.Recv.List {
+				for _, _ = range f.Names {
+					recvSymbols = append(recvSymbols, extractSymbols(f.Type)...)
+				}
+			}
+			symbols = append(symbols, Sym("recv", recvSymbols...))
+		}
+		symbols = append(symbols, extractSymbols(t.Type)...)
 	case *ast.FuncType:
 		var paramSymbols []*Symbol
 		for _, f := range t.Params.List {
@@ -124,8 +140,12 @@ func handleFuncDecl(node ast.Node, context interface{}) {
 
 		symbol := &Symbol{Name: funcDecl.Name.Name}
 		if isExported(symbol.Name) {
-			symbol.Symbols = extractSymbols(funcDecl.Type)
-			current.Symbols[symbol.Name] = Sym("func", symbol)
+			symbol.Symbols = extractSymbols(funcDecl)
+			if funcDecl.Recv != nil {
+				current.Symbols[symbol.Name] = Sym("method", symbol)
+			} else {
+				current.Symbols[symbol.Name] = Sym("func", symbol)
+			}
 		}
 	}
 }

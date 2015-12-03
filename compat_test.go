@@ -347,3 +347,59 @@ const F, G = "answer", 42
 
 	testCompat(t, source, expected)
 }
+
+func TestStructMethod(t *testing.T) {
+	source := `
+package p
+
+type MyStr struct {}
+
+func (ms MyStr) Something(a int) {
+}
+`
+
+	expected := InterfaceContext{
+		Packages: map[string]*Package{
+			"p": Pack("p", map[string]*Symbol{
+				"MyStr": Sym("type", Sym("MyStr")),
+				"Something": Sym("method",
+					Sym("Something",
+						Sym("recv",
+							Sym("MyStr")),
+						Sym("params",
+							Sym("int")),
+						Sym("results"))),
+			}),
+		},
+	}
+
+	testCompat(t, source, expected)
+}
+
+func TestStructPointerMethod(t *testing.T) {
+	source := `
+package p
+
+type MyStr struct {}
+
+func (ms *MyStr) Something(a int) {
+}
+`
+
+	expected := InterfaceContext{
+		Packages: map[string]*Package{
+			"p": Pack("p", map[string]*Symbol{
+				"MyStr": Sym("type", Sym("MyStr")),
+				"Something": Sym("method",
+					Sym("Something",
+						Sym("recv",
+							Sym("*MyStr")),
+						Sym("params",
+							Sym("int")),
+						Sym("results"))),
+			}),
+		},
+	}
+
+	testCompat(t, source, expected)
+}
