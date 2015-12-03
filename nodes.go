@@ -5,8 +5,8 @@ type Node interface {
 }
 
 type Symbol struct {
-	Name    string
-	Symbols []Node
+	Name  string
+	Nodes []Node
 }
 
 func compareSymbolNames(oldName, newName string) bool {
@@ -27,12 +27,12 @@ func (older *Symbol) Compare(n Node) bool {
 			return false
 		}
 
-		if len(older.Symbols) != len(newer.Symbols) {
+		if len(older.Nodes) != len(newer.Nodes) {
 			return false
 		}
 
-		for index, sOlder := range older.Symbols {
-			sNewer := newer.Symbols[index]
+		for index, sOlder := range older.Nodes {
+			sNewer := newer.Nodes[index]
 
 			if !sOlder.Compare(sNewer) {
 				return false
@@ -71,14 +71,14 @@ func (older *Struct) Compare(n Node) bool {
 }
 
 type Package struct {
-	Name    string
-	Symbols map[string]Node
+	Name  string
+	Nodes map[string]Node
 }
 
 func (older *Package) Compare(n Node) bool {
 	if newer, ok := n.(*Package); ok {
-		for name, sOlder := range older.Symbols {
-			if sNewer, ok := newer.Symbols[name]; ok {
+		for name, sOlder := range older.Nodes {
+			if sNewer, ok := newer.Nodes[name]; ok {
 				if !sOlder.Compare(sNewer) {
 					return false
 				}

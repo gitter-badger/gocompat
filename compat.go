@@ -6,8 +6,8 @@ import (
 	"unicode"
 )
 
-func Pack(name string, symbols map[string]Node) *Package {
-	return &Package{name, symbols}
+func Pack(name string, nodes map[string]Node) *Package {
+	return &Package{name, nodes}
 }
 
 func Str(name string, fields map[string]Node) *Struct {
@@ -15,7 +15,7 @@ func Str(name string, fields map[string]Node) *Struct {
 }
 
 func Sym(name string, nodes ...Node) *Symbol {
-	return &Symbol{Name: name, Symbols: nodes}
+	return &Symbol{name, nodes}
 }
 
 // InterfaceContext is passed to the AST visitor in order to keep track the symbols
@@ -160,14 +160,14 @@ func handleTypeSpec(node ast.Node, context interface{}) {
 					ms[s.Name] = s
 				}
 				node := &Struct{Name: typeSpec.Name.Name, Fields: ms}
-				current.Symbols[node.Name] = Sym("type", node)
+				current.Nodes[node.Name] = Sym("type", node)
 			} else {
 				nodes := []Node{}
 				for _, s := range symbols {
 					nodes = append(nodes, s)
 				}
-				symbol := &Symbol{Name: typeSpec.Name.Name, Symbols: nodes}
-				current.Symbols[symbol.Name] = Sym("type", symbol)
+				symbol := &Symbol{typeSpec.Name.Name, nodes}
+				current.Nodes[symbol.Name] = Sym("type", symbol)
 			}
 
 		}
@@ -179,17 +179,16 @@ func handleFuncDecl(node ast.Node, context interface{}) {
 		context, _ := context.(*InterfaceContext)
 		current := context.CurrentPackage
 
-		symbol := &Symbol{Name: funcDecl.Name.Name}
-		if isExported(symbol.Name) {
+		if isExported(funcDecl.Name.Name) {
 			nodes := []Node{}
 			for _, s := range extractSymbols(funcDecl) {
 				nodes = append(nodes, s)
 			}
-			symbol.Symbols = nodes
+			symbol := &Symbol{funcDecl.Name.Name, nodes}
 			if funcDecl.Recv != nil {
-				current.Symbols[symbol.Name] = Sym("method", symbol)
+				current.Nodes[symbol.Name] = Sym("method", symbol)
 			} else {
-				current.Symbols[symbol.Name] = Sym("func", symbol)
+				current.Nodes[symbol.Name] = Sym("func", symbol)
 			}
 		}
 	}
@@ -207,9 +206,9 @@ func handleSpec(spec ast.Node, context interface{}) {
 				nodes = append(nodes, s)
 			}
 			for _, name := range valueSpec.Names {
-				symbol := &Symbol{Name: name.Name, Symbols: nodes}
+				symbol := &Symbol{name.Name, nodes}
 				if isExported(symbol.Name) {
-					current.Symbols[symbol.Name] = Sym("var", symbol)
+					current.Nodes[symbol.Name] = Sym("var", symbol)
 				}
 			}
 		} else {
@@ -219,9 +218,9 @@ func handleSpec(spec ast.Node, context interface{}) {
 				for _, s := range typeSymbols {
 					nodes = append(nodes, s)
 				}
-				symbol := &Symbol{Name: name.Name, Symbols: nodes}
+				symbol := &Symbol{name.Name, nodes}
 				if isExported(symbol.Name) {
-					current.Symbols[symbol.Name] = Sym("var", symbol)
+					current.Nodes[symbol.Name] = Sym("var", symbol)
 				}
 			}
 		}
