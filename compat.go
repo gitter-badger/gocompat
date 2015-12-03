@@ -107,7 +107,7 @@ func handleTypeSpec(node ast.Node, context interface{}) {
 		symbol := &Symbol{Name: typeSpec.Name.Name}
 		if isExported(symbol.Name) {
 			symbol.Symbols = extractSymbols(typeSpec.Type)
-			current.Symbols[symbol.Name] = symbol
+			current.Symbols[symbol.Name] = Sym("type", symbol)
 		}
 	}
 }
@@ -120,7 +120,7 @@ func handleFuncDecl(node ast.Node, context interface{}) {
 		symbol := &Symbol{Name: funcDecl.Name.Name}
 		if isExported(symbol.Name) {
 			symbol.Symbols = extractSymbols(funcDecl.Type)
-			current.Symbols[symbol.Name] = symbol
+			current.Symbols[symbol.Name] = Sym("func", symbol)
 		}
 	}
 }
@@ -135,7 +135,7 @@ func handleSpec(spec ast.Node, context interface{}) {
 			for _, name := range valueSpec.Names {
 				symbol := &Symbol{Name: name.Name, Symbols: typeSymbols}
 				if isExported(symbol.Name) {
-					current.Symbols[symbol.Name] = symbol
+					current.Symbols[symbol.Name] = Sym("var", symbol)
 				}
 			}
 		} else {
@@ -143,7 +143,7 @@ func handleSpec(spec ast.Node, context interface{}) {
 				typeSymbols := extractSymbols(valueSpec.Values[index])
 				symbol := &Symbol{Name: name.Name, Symbols: typeSymbols}
 				if isExported(symbol.Name) {
-					current.Symbols[symbol.Name] = symbol
+					current.Symbols[symbol.Name] = Sym("var", symbol)
 				}
 			}
 		}

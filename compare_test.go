@@ -146,3 +146,53 @@ func Something(a ...int) {
 
 	testCompare(t, older, newer, false)
 }
+
+func TestTypeToVar(t *testing.T) {
+	older := `
+package p
+
+type A int
+`
+
+	newer := `
+package p
+
+var A = 5
+`
+
+	testCompare(t, older, newer, true)
+}
+
+func TestVarToFunc(t *testing.T) {
+	older := `
+package p
+
+var A int = 5
+`
+
+	newer := `
+package p
+
+func A(a int) {
+}
+`
+
+	testCompare(t, older, newer, true)
+}
+
+func TestFuncToType(t *testing.T) {
+	older := `
+package p
+
+func A(a int) {
+}
+`
+
+	newer := `
+package p
+
+type A struct {}
+`
+
+	testCompare(t, older, newer, true)
+}
