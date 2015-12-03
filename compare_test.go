@@ -235,3 +235,25 @@ func A(a string, b int) {
 
 	testCompare(t, older, newer, true)
 }
+
+func TestSwapStructFields(t *testing.T) {
+	older := `
+package p
+
+type A struct {
+	B	int
+	C	float64
+}
+`
+
+	newer := `
+package p
+
+type A struct {
+	C	float64
+	B	int
+}
+`
+
+	testCompare(t, older, newer, false)
+}

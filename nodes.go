@@ -6,7 +6,7 @@ type Node interface {
 
 type Symbol struct {
 	Name    string
-	Symbols []*Symbol
+	Symbols []Node
 }
 
 func compareSymbolNames(oldName, newName string) bool {
@@ -44,9 +44,35 @@ func (older *Symbol) Compare(n Node) bool {
 	}
 }
 
+type Struct struct {
+	Name   string
+	Fields map[string]Node
+}
+
+func (older *Struct) Compare(n Node) bool {
+	if newer, ok := n.(*Struct); ok {
+		if ok := compareSymbolNames(older.Name, newer.Name); !ok {
+			return false
+		}
+
+		for name, sOlder := range older.Fields {
+			if sNewer, ok := newer.Fields[name]; ok {
+				if !sOlder.Compare(sNewer) {
+					return false
+				}
+			} else {
+				return false
+			}
+		}
+		return true
+	} else {
+		return false
+	}
+}
+
 type Package struct {
 	Name    string
-	Symbols map[string]*Symbol
+	Symbols map[string]Node
 }
 
 func (older *Package) Compare(n Node) bool {

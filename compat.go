@@ -6,12 +6,16 @@ import (
 	"unicode"
 )
 
-func Pack(name string, symbols map[string]*Symbol) *Package {
+func Pack(name string, symbols map[string]Node) *Package {
 	return &Package{name, symbols}
 }
 
-func Sym(name string, symbols ...*Symbol) *Symbol {
-	return &Symbol{Name: name, Symbols: symbols}
+func Str(name string, fields map[string]Node) *Struct {
+	return &Struct{name, fields}
+}
+
+func Sym(name string, nodes ...Node) *Symbol {
+	return &Symbol{Name: name, Symbols: nodes}
 }
 
 // InterfaceContext is passed to the AST visitor in order to keep track the symbols
@@ -58,13 +62,21 @@ func extractSymbols(expr ast.Node) []*Symbol {
 	case *ast.StructType:
 		for _, f := range t.Fields.List {
 			for _, n := range f.Names {
-				symbols = append(symbols, Sym(n.Name, extractSymbols(f.Type)...))
+				nodes := []Node{}
+				for _, s := range extractSymbols(f.Type) {
+					nodes = append(nodes, s)
+				}
+				symbols = append(symbols, Sym(n.Name, nodes...))
 			}
 		}
 	case *ast.InterfaceType:
 		for _, m := range t.Methods.List {
 			for _, n := range m.Names {
-				symbols = append(symbols, Sym(n.Name, extractSymbols(m.Type)...))
+				nodes := []Node{}
+				for _, s := range extractSymbols(m.Type) {
+					nodes = append(nodes, s)
+				}
+				symbols = append(symbols, Sym(n.Name, nodes...))
 			}
 		}
 	case *ast.StarExpr:
@@ -74,31 +86,47 @@ func extractSymbols(expr ast.Node) []*Symbol {
 		}
 	case *ast.FuncDecl:
 		if t.Recv != nil {
-			var recvSymbols []*Symbol
+			var recvSymbols []Node
 			for _, f := range t.Recv.List {
 				for _, _ = range f.Names {
-					recvSymbols = append(recvSymbols, extractSymbols(f.Type)...)
+					nodes := []Node{}
+					for _, s := range extractSymbols(f.Type) {
+						nodes = append(nodes, s)
+					}
+					recvSymbols = append(recvSymbols, nodes...)
 				}
 			}
 			symbols = append(symbols, Sym("recv", recvSymbols...))
 		}
 		symbols = append(symbols, extractSymbols(t.Type)...)
 	case *ast.FuncType:
-		var paramSymbols []*Symbol
+		var paramSymbols []Node
 		for _, f := range t.Params.List {
 			for _, _ = range f.Names {
-				paramSymbols = append(paramSymbols, extractSymbols(f.Type)...)
+				nodes := []Node{}
+				for _, s := range extractSymbols(f.Type) {
+					nodes = append(nodes, s)
+				}
+				paramSymbols = append(paramSymbols, nodes...)
 			}
 			if f.Names == nil {
-				paramSymbols = append(paramSymbols, extractSymbols(f.Type)...)
+				nodes := []Node{}
+				for _, s := range extractSymbols(f.Type) {
+					nodes = append(nodes, s)
+				}
+				paramSymbols = append(paramSymbols, nodes...)
 			}
 		}
 		symbols = append(symbols, Sym("params", paramSymbols...))
 
-		var resultSymbols []*Symbol
+		var resultSymbols []Node
 		if t.Results != nil {
 			for _, f := range t.Results.List {
-				resultSymbols = append(resultSymbols, extractSymbols(f.Type)...)
+				nodes := []Node{}
+				for _, s := range extractSymbols(f.Type) {
+					nodes = append(nodes, s)
+				}
+				resultSymbols = append(resultSymbols, nodes...)
 			}
 		}
 		symbols = append(symbols, Sym("results", resultSymbols...))
@@ -113,7 +141,7 @@ func handlePackage(node ast.Node, context interface{}) {
 		packageName := file.Name.Name
 
 		if _, ok := context.Application.Packages[packageName]; !ok {
-			context.Application.Packages[packageName] = Pack(packageName, map[string]*Symbol{})
+			context.Application.Packages[packageName] = Pack(packageName, map[string]Node{})
 		}
 		context.CurrentPackage, _ = context.Application.Packages[packageName]
 	}
@@ -124,10 +152,24 @@ func handleTypeSpec(node ast.Node, context interface{}) {
 		context, _ := context.(*InterfaceContext)
 		current := context.CurrentPackage
 
-		symbol := &Symbol{Name: typeSpec.Name.Name}
-		if isExported(symbol.Name) {
-			symbol.Symbols = extractSymbols(typeSpec.Type)
-			current.Symbols[symbol.Name] = Sym("type", symbol)
+		if isExported(typeSpec.Name.Name) {
+			symbols := extractSymbols(typeSpec.Type)
+			if _, ok := typeSpec.Type.(*ast.StructType); ok {
+				ms := map[string]Node{}
+				for _, s := range symbols {
+					ms[s.Name] = s
+				}
+				node := &Struct{Name: typeSpec.Name.Name, Fields: ms}
+				current.Symbols[node.Name] = Sym("type", node)
+			} else {
+				nodes := []Node{}
+				for _, s := range symbols {
+					nodes = append(nodes, s)
+				}
+				symbol := &Symbol{Name: typeSpec.Name.Name, Symbols: nodes}
+				current.Symbols[symbol.Name] = Sym("type", symbol)
+			}
+
 		}
 	}
 }
@@ -139,7 +181,11 @@ func handleFuncDecl(node ast.Node, context interface{}) {
 
 		symbol := &Symbol{Name: funcDecl.Name.Name}
 		if isExported(symbol.Name) {
-			symbol.Symbols = extractSymbols(funcDecl)
+			nodes := []Node{}
+			for _, s := range extractSymbols(funcDecl) {
+				nodes = append(nodes, s)
+			}
+			symbol.Symbols = nodes
 			if funcDecl.Recv != nil {
 				current.Symbols[symbol.Name] = Sym("method", symbol)
 			} else {
@@ -156,8 +202,12 @@ func handleSpec(spec ast.Node, context interface{}) {
 
 		if valueSpec.Type != nil {
 			typeSymbols := extractSymbols(valueSpec.Type)
+			nodes := []Node{}
+			for _, s := range typeSymbols {
+				nodes = append(nodes, s)
+			}
 			for _, name := range valueSpec.Names {
-				symbol := &Symbol{Name: name.Name, Symbols: typeSymbols}
+				symbol := &Symbol{Name: name.Name, Symbols: nodes}
 				if isExported(symbol.Name) {
 					current.Symbols[symbol.Name] = Sym("var", symbol)
 				}
@@ -165,7 +215,11 @@ func handleSpec(spec ast.Node, context interface{}) {
 		} else {
 			for index, name := range valueSpec.Names {
 				typeSymbols := extractSymbols(valueSpec.Values[index])
-				symbol := &Symbol{Name: name.Name, Symbols: typeSymbols}
+				nodes := []Node{}
+				for _, s := range typeSymbols {
+					nodes = append(nodes, s)
+				}
+				symbol := &Symbol{Name: name.Name, Symbols: nodes}
 				if isExported(symbol.Name) {
 					current.Symbols[symbol.Name] = Sym("var", symbol)
 				}
