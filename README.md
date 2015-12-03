@@ -4,15 +4,22 @@ Backwards compatibility checker for Go APIs.
 
 ## Introduction
 
-**gocompat** allows you to verify backwards compatibility of you project API by continuously storing an index of all exported symbols. This index is stored in a `.gocompat` file that is used to later compare against the current API state.
+**gocompat** allows you to verify backwards compatibility of your project interface.
+It stores an index of all exported symbols in a `.gocompat` file that allows comparisons with
+newer versions of the interfaces at later point. 
 
 ## Installation
 
-Execute `go get -u "github.com/s2gatev/gocompat"`.
+`go get -u github.com/s2gatev/gocompat`
 
 ## Usage
 
-Execute `gocompat` inside your project directory.
+Execute `gocompat` inside your project directory. You can modify the command by inserting:
+* `-f` for storing the current interface in the index even if it is not compatible with the previous one.
+
+## Contribution
+
+Contributions via issues and pull requests are more than welcome!
 
 ## License
 
