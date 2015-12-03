@@ -17,6 +17,14 @@ newer versions of the interfaces at later point.
 Execute `gocompat` inside your project directory. You can modify the command by inserting:
 * `-f` for storing the current interface in the index even if it is not compatible with the previous one.
 
+## TODO
+
+A list of things that should be taken care of:
+* Handle methods for structs.
+* Handle interfaces and their methods.
+* Handle nested packages property. `./a/test` is different thank `./b/test`.
+* Handle interface conversion - stricker to more relaxed interface should not break compatibility.
+
 ## Contribution
 
 Contributions via issues and pull requests are more than welcome!
