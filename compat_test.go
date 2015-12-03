@@ -403,3 +403,34 @@ func (ms *MyStr) Something(a int) {
 
 	testCompat(t, source, expected)
 }
+
+func TestInterface(t *testing.T) {
+	source := `
+package p
+
+type InterStringer interface {
+	String() string
+	Int(float64) int
+}
+`
+
+	expected := InterfaceContext{
+		Packages: map[string]*Package{
+			"p": Pack("p", map[string]*Symbol{
+				"InterStringer": Sym("type",
+					Sym("InterStringer",
+						Sym("String",
+							Sym("params"),
+							Sym("results",
+								Sym("string"))),
+						Sym("Int",
+							Sym("params",
+								Sym("float64")),
+							Sym("results",
+								Sym("int"))))),
+			}),
+		},
+	}
+
+	testCompat(t, source, expected)
+}

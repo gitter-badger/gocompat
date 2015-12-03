@@ -71,6 +71,12 @@ func extractSymbols(expr ast.Node) []*Symbol {
 				symbols = append(symbols, Sym(n.Name, extractSymbols(f.Type)...))
 			}
 		}
+	case *ast.InterfaceType:
+		for _, m := range t.Methods.List {
+			for _, n := range m.Names {
+				symbols = append(symbols, Sym(n.Name, extractSymbols(m.Type)...))
+			}
+		}
 	case *ast.StarExpr:
 		symbols = extractSymbols(t.X)
 		for index, _ := range symbols {
@@ -91,6 +97,9 @@ func extractSymbols(expr ast.Node) []*Symbol {
 		var paramSymbols []*Symbol
 		for _, f := range t.Params.List {
 			for _, _ = range f.Names {
+				paramSymbols = append(paramSymbols, extractSymbols(f.Type)...)
+			}
+			if f.Names == nil {
 				paramSymbols = append(paramSymbols, extractSymbols(f.Type)...)
 			}
 		}
