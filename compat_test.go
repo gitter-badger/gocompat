@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"go/parser"
 	"go/token"
 	"testing"
@@ -18,7 +17,6 @@ func testCompat(
 	actual := &CompatContext{Packages: map[string]*Package{}}
 	ProcessFile(fileSet, file, actual)
 
-	fmt.Printf("%v\n", actual.Packages["p"].Symbols["Something"])
 	if err := ComparePackages(expected.Packages, actual.Packages); err != nil {
 		t.Error(err)
 	}
@@ -217,6 +215,62 @@ func Something() int {
 			"p": Pack("p", map[string]*Symbol{
 				"Something": Sym("Something",
 					Sym("int")),
+			}),
+		},
+	}
+
+	testCompat(t, source, expected)
+}
+
+func TestExportedVar(t *testing.T) {
+	source := `
+package p
+
+var A int = 5
+`
+
+	expected := CompatContext{
+		Packages: map[string]*Package{
+			"p": Pack("p", map[string]*Symbol{
+				"A": Sym("A", Sym("int")),
+			}),
+		},
+	}
+
+	testCompat(t, source, expected)
+}
+
+func TestNotExportedVar(t *testing.T) {
+	source := `
+package p
+
+var a int = 5
+`
+
+	expected := CompatContext{
+		Packages: map[string]*Package{
+			"p": Pack("p", map[string]*Symbol{}),
+		},
+	}
+
+	testCompat(t, source, expected)
+}
+
+func TestComplexVar(t *testing.T) {
+	source := `
+package p
+
+var A, B, c, D int = 5
+var S string = "something"
+`
+
+	expected := CompatContext{
+		Packages: map[string]*Package{
+			"p": Pack("p", map[string]*Symbol{
+				"A": Sym("A", Sym("int")),
+				"B": Sym("B", Sym("int")),
+				"D": Sym("D", Sym("int")),
+				"S": Sym("S", Sym("string")),
 			}),
 		},
 	}

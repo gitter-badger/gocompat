@@ -71,6 +71,28 @@ func handleFuncDecl(node ast.Node, context *CompatContext) {
 	}
 }
 
+func handleSpec(spec ast.Node, context *CompatContext) {
+	if valueSpec, ok := spec.(*ast.ValueSpec); ok {
+		current := context.CurrentPackage
+
+		typeSymbols := extractSymbols(valueSpec.Type)
+		for _, name := range valueSpec.Names {
+			symbol := &Symbol{Name: name.Name, Symbols: typeSymbols}
+			if isExported(symbol.Name) {
+				current.Symbols[symbol.Name] = symbol
+			}
+		}
+	}
+}
+
+func handleGenDecl(node ast.Node, context *CompatContext) {
+	if genDecl, ok := node.(*ast.GenDecl); ok {
+		for _, spec := range genDecl.Specs {
+			handleSpec(spec, context)
+		}
+	}
+}
+
 func extractSymbols(expr ast.Expr) []*Symbol {
 	symbols := []*Symbol{}
 
@@ -112,5 +134,6 @@ func ProcessFile(
 	visitor.Handle(handlePackage)
 	visitor.Handle(handleTypeSpec)
 	visitor.Handle(handleFuncDecl)
+	visitor.Handle(handleGenDecl)
 	ast.Walk(visitor, file)
 }
