@@ -6,14 +6,6 @@ import (
 	"unicode"
 )
 
-func Pack(name string, nodes map[string]Node) *Package {
-	return &Package{name, nodes}
-}
-
-func Str(name string, fields map[string]Node) *Struct {
-	return &Struct{name, fields}
-}
-
 func Sym(name string, nodes ...Node) *Symbol {
 	return &Symbol{name, nodes}
 }
@@ -141,7 +133,8 @@ func handlePackage(node ast.Node, context interface{}) {
 		packageName := file.Name.Name
 
 		if _, ok := context.Application.Packages[packageName]; !ok {
-			context.Application.Packages[packageName] = Pack(packageName, map[string]Node{})
+			context.Application.Packages[packageName] =
+				&Package{packageName, map[string]Node{}}
 		}
 		context.CurrentPackage, _ = context.Application.Packages[packageName]
 	}
