@@ -14,7 +14,7 @@ func Sym(name string, nodes ...Node) *Symbol {
 // part of the program interface.
 type InterfaceContext struct {
 	CurrentPackage *Package
-	Application    *Application
+	Project        *Project
 }
 
 // isExporeted returns if a given name should be public or private.
@@ -132,11 +132,11 @@ func handlePackage(node ast.Node, context interface{}) {
 		context, _ := context.(*InterfaceContext)
 		packageName := file.Name.Name
 
-		if _, ok := context.Application.Packages[packageName]; !ok {
-			context.Application.Packages[packageName] =
+		if _, ok := context.Project.Packages[packageName]; !ok {
+			context.Project.Packages[packageName] =
 				&Package{packageName, map[string]Node{}}
 		}
-		context.CurrentPackage, _ = context.Application.Packages[packageName]
+		context.CurrentPackage, _ = context.Project.Packages[packageName]
 	}
 }
 

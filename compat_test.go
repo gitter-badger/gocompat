@@ -15,11 +15,11 @@ func testCompat(
 	file, _ := parser.ParseFile(fileSet, "source.go", source, parser.ParseComments)
 
 	actual := &InterfaceContext{
-		Application: &Application{Packages: map[string]*Package{}},
+		Project: &Project{Packages: map[string]*Package{}},
 	}
 	ProcessFile(fileSet, file, actual)
 
-	if ok := expected.Application.Compare(actual.Application); !ok {
+	if ok := expected.Project.Compare(actual.Project); !ok {
 		t.Error("Error in compat test.")
 	}
 }
@@ -32,7 +32,7 @@ type MyInt int
 `
 
 	expected := InterfaceContext{
-		Application: &Application{
+		Project: &Project{
 			Packages: map[string]*Package{
 				"p": &Package{"p", map[string]Node{
 					"MyInt": Sym("type", Sym("MyInt", Sym("int"))),
@@ -56,7 +56,7 @@ type MyInt struct {
 `
 
 	expected := InterfaceContext{
-		Application: &Application{
+		Project: &Project{
 			Packages: map[string]*Package{
 				"p": &Package{"p", map[string]Node{
 					"MyInt": Sym("type",
@@ -87,7 +87,7 @@ type MyInt struct {
 `
 
 	expected := InterfaceContext{
-		Application: &Application{
+		Project: &Project{
 			Packages: map[string]*Package{
 				"p": &Package{"p", map[string]Node{
 					"MyInt": Sym("type",
@@ -114,7 +114,7 @@ type myInt int
 `
 
 	expected := InterfaceContext{
-		Application: &Application{
+		Project: &Project{
 			Packages: map[string]*Package{
 				"p": &Package{"p", map[string]Node{}},
 			},
@@ -134,7 +134,7 @@ func NameLength(name string) int {
 `
 
 	expected := InterfaceContext{
-		Application: &Application{
+		Project: &Project{
 			Packages: map[string]*Package{
 				"p": &Package{"p", map[string]Node{
 					"NameLength": Sym("func", Sym("NameLength",
@@ -161,7 +161,7 @@ func Something(a, b string, options ...int) (int, bool) {
 `
 
 	expected := InterfaceContext{
-		Application: &Application{
+		Project: &Project{
 			Packages: map[string]*Package{
 				"p": &Package{"p", map[string]Node{
 					"Something": Sym("func", Sym("Something",
@@ -191,7 +191,7 @@ func something(a, b string, options ...int) (int, bool) {
 `
 
 	expected := InterfaceContext{
-		Application: &Application{
+		Project: &Project{
 			Packages: map[string]*Package{
 				"p": &Package{"p", map[string]Node{}},
 			},
@@ -210,7 +210,7 @@ func Something(a, b string, options ...int) {
 `
 
 	expected := InterfaceContext{
-		Application: &Application{
+		Project: &Project{
 			Packages: map[string]*Package{
 				"p": &Package{"p", map[string]Node{
 					"Something": Sym("func", Sym("Something",
@@ -237,7 +237,7 @@ func Something() int {
 `
 
 	expected := InterfaceContext{
-		Application: &Application{
+		Project: &Project{
 			Packages: map[string]*Package{
 				"p": &Package{"p", map[string]Node{
 					"Something": Sym("func", Sym("Something",
@@ -260,7 +260,7 @@ var A int = 5
 `
 
 	expected := InterfaceContext{
-		Application: &Application{
+		Project: &Project{
 			Packages: map[string]*Package{
 				"p": &Package{"p", map[string]Node{
 					"A": Sym("var", Sym("A", Sym("int"))),
@@ -280,7 +280,7 @@ var a int = 5
 `
 
 	expected := InterfaceContext{
-		Application: &Application{
+		Project: &Project{
 			Packages: map[string]*Package{
 				"p": &Package{"p", map[string]Node{}},
 			},
@@ -300,7 +300,7 @@ var F, G = "answer", 42
 `
 
 	expected := InterfaceContext{
-		Application: &Application{
+		Project: &Project{
 			Packages: map[string]*Package{
 				"p": &Package{"p", map[string]Node{
 					"A": Sym("var", Sym("A", Sym("int"))),
@@ -325,7 +325,7 @@ const A int = 5
 `
 
 	expected := InterfaceContext{
-		Application: &Application{
+		Project: &Project{
 			Packages: map[string]*Package{
 				"p": &Package{"p", map[string]Node{
 					"A": Sym("var", Sym("A", Sym("int"))),
@@ -345,7 +345,7 @@ const a int = 5
 `
 
 	expected := InterfaceContext{
-		Application: &Application{
+		Project: &Project{
 			Packages: map[string]*Package{
 				"p": &Package{"p", map[string]Node{}},
 			},
@@ -365,7 +365,7 @@ const F, G = "answer", 42
 `
 
 	expected := InterfaceContext{
-		Application: &Application{
+		Project: &Project{
 			Packages: map[string]*Package{
 				"p": &Package{"p", map[string]Node{
 					"A": Sym("var", Sym("A", Sym("int"))),
@@ -393,7 +393,7 @@ func (ms MyStr) Something(a int) {
 `
 
 	expected := InterfaceContext{
-		Application: &Application{
+		Project: &Project{
 			Packages: map[string]*Package{
 				"p": &Package{"p", map[string]Node{
 					"MyStr": Sym("type", &Struct{"MyStr", map[string]Node{}}),
@@ -423,7 +423,7 @@ func (ms *MyStr) Something(a int) {
 `
 
 	expected := InterfaceContext{
-		Application: &Application{
+		Project: &Project{
 			Packages: map[string]*Package{
 				"p": &Package{"p", map[string]Node{
 					"MyStr": Sym("type", &Struct{"MyStr", map[string]Node{}}),
@@ -453,7 +453,7 @@ type InterStringer interface {
 `
 
 	expected := InterfaceContext{
-		Application: &Application{
+		Project: &Project{
 			Packages: map[string]*Package{
 				"p": &Package{"p", map[string]Node{
 					"InterStringer": Sym("type",

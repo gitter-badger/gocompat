@@ -6,16 +6,16 @@ import (
 	"testing"
 )
 
-func parse(source string) *Application {
+func parse(source string) *Project {
 	fileSet := token.NewFileSet()
 	file, _ := parser.ParseFile(fileSet, "source.go", source, parser.ParseComments)
 
 	context := &InterfaceContext{
-		Application: &Application{Packages: map[string]*Package{}},
+		Project: &Project{Packages: map[string]*Package{}},
 	}
 	ProcessFile(fileSet, file, context)
 
-	return context.Application
+	return context.Project
 }
 
 func testCompare(
