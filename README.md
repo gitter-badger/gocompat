@@ -25,7 +25,7 @@ A list of things that should be taken care of:
 
 ## Contribution
 
-Contributions via issues and pull requests are more than welcome!
+If you have an idea of how to make this project better, please do share it at the [official golang-nuts list](https://groups.google.com/forum/#!topic/golang-nuts/IjLhL4OZmrQ). Contributions via [issues](https://github.com/s2gatev/gocompat/issues) and [pull requests](https://github.com/s2gatev/gocompat/pulls) are more than welcome!
 
 ## License
 
