@@ -4,6 +4,8 @@ import (
 	"go/parser"
 	"go/token"
 	"testing"
+
+	"github.com/s2gatev/gocompat/tree"
 )
 
 func testCompat(
@@ -15,7 +17,7 @@ func testCompat(
 	file, _ := parser.ParseFile(fileSet, "source.go", source, parser.ParseComments)
 
 	actual := &InterfaceContext{
-		Project: &Project{Packages: map[string]*Package{}},
+		Project: &tree.Project{Packages: map[string]*tree.Package{}},
 	}
 	ProcessFile(fileSet, file, actual)
 
@@ -32,9 +34,9 @@ type MyInt int
 `
 
 	expected := InterfaceContext{
-		Project: &Project{
-			Packages: map[string]*Package{
-				"p": &Package{"p", map[string]Node{
+		Project: &tree.Project{
+			Packages: map[string]*tree.Package{
+				"p": &tree.Package{"p", map[string]tree.Node{
 					"MyInt": Sym("type", Sym("MyInt", Sym("int"))),
 				}},
 			},
@@ -56,11 +58,11 @@ type MyInt struct {
 `
 
 	expected := InterfaceContext{
-		Project: &Project{
-			Packages: map[string]*Package{
-				"p": &Package{"p", map[string]Node{
+		Project: &tree.Project{
+			Packages: map[string]*tree.Package{
+				"p": &tree.Package{"p", map[string]tree.Node{
 					"MyInt": Sym("type",
-						&Struct{"MyInt", map[string]Node{
+						&tree.Struct{"MyInt", map[string]tree.Node{
 							"A": Sym("A", Sym("int")),
 							"B": Sym("B", Sym("float32")),
 							"C": Sym("C", Sym("string")),
@@ -87,11 +89,11 @@ type MyInt struct {
 `
 
 	expected := InterfaceContext{
-		Project: &Project{
-			Packages: map[string]*Package{
-				"p": &Package{"p", map[string]Node{
+		Project: &tree.Project{
+			Packages: map[string]*tree.Package{
+				"p": &tree.Package{"p", map[string]tree.Node{
 					"MyInt": Sym("type",
-						&Struct{"MyInt", map[string]Node{
+						&tree.Struct{"MyInt", map[string]tree.Node{
 							"A": Sym("A", Sym("int")),
 							"B": Sym("B",
 								Sym("C", Sym("float32")),
@@ -114,9 +116,9 @@ type myInt int
 `
 
 	expected := InterfaceContext{
-		Project: &Project{
-			Packages: map[string]*Package{
-				"p": &Package{"p", map[string]Node{}},
+		Project: &tree.Project{
+			Packages: map[string]*tree.Package{
+				"p": &tree.Package{"p", map[string]tree.Node{}},
 			},
 		},
 	}
@@ -134,9 +136,9 @@ func NameLength(name string) int {
 `
 
 	expected := InterfaceContext{
-		Project: &Project{
-			Packages: map[string]*Package{
-				"p": &Package{"p", map[string]Node{
+		Project: &tree.Project{
+			Packages: map[string]*tree.Package{
+				"p": &tree.Package{"p", map[string]tree.Node{
 					"NameLength": Sym("func", Sym("NameLength",
 						Sym("params",
 							Sym("string")),
@@ -161,9 +163,9 @@ func Something(a, b string, options ...int) (int, bool) {
 `
 
 	expected := InterfaceContext{
-		Project: &Project{
-			Packages: map[string]*Package{
-				"p": &Package{"p", map[string]Node{
+		Project: &tree.Project{
+			Packages: map[string]*tree.Package{
+				"p": &tree.Package{"p", map[string]tree.Node{
 					"Something": Sym("func", Sym("Something",
 						Sym("params",
 							Sym("string"),
@@ -191,9 +193,9 @@ func something(a, b string, options ...int) (int, bool) {
 `
 
 	expected := InterfaceContext{
-		Project: &Project{
-			Packages: map[string]*Package{
-				"p": &Package{"p", map[string]Node{}},
+		Project: &tree.Project{
+			Packages: map[string]*tree.Package{
+				"p": &tree.Package{"p", map[string]tree.Node{}},
 			},
 		},
 	}
@@ -210,9 +212,9 @@ func Something(a, b string, options ...int) {
 `
 
 	expected := InterfaceContext{
-		Project: &Project{
-			Packages: map[string]*Package{
-				"p": &Package{"p", map[string]Node{
+		Project: &tree.Project{
+			Packages: map[string]*tree.Package{
+				"p": &tree.Package{"p", map[string]tree.Node{
 					"Something": Sym("func", Sym("Something",
 						Sym("params",
 							Sym("string"),
@@ -237,9 +239,9 @@ func Something() int {
 `
 
 	expected := InterfaceContext{
-		Project: &Project{
-			Packages: map[string]*Package{
-				"p": &Package{"p", map[string]Node{
+		Project: &tree.Project{
+			Packages: map[string]*tree.Package{
+				"p": &tree.Package{"p", map[string]tree.Node{
 					"Something": Sym("func", Sym("Something",
 						Sym("params"),
 						Sym("results",
@@ -260,9 +262,9 @@ var A int = 5
 `
 
 	expected := InterfaceContext{
-		Project: &Project{
-			Packages: map[string]*Package{
-				"p": &Package{"p", map[string]Node{
+		Project: &tree.Project{
+			Packages: map[string]*tree.Package{
+				"p": &tree.Package{"p", map[string]tree.Node{
 					"A": Sym("var", Sym("A", Sym("int"))),
 				}},
 			},
@@ -280,9 +282,9 @@ var a int = 5
 `
 
 	expected := InterfaceContext{
-		Project: &Project{
-			Packages: map[string]*Package{
-				"p": &Package{"p", map[string]Node{}},
+		Project: &tree.Project{
+			Packages: map[string]*tree.Package{
+				"p": &tree.Package{"p", map[string]tree.Node{}},
 			},
 		},
 	}
@@ -300,9 +302,9 @@ var F, G = "answer", 42
 `
 
 	expected := InterfaceContext{
-		Project: &Project{
-			Packages: map[string]*Package{
-				"p": &Package{"p", map[string]Node{
+		Project: &tree.Project{
+			Packages: map[string]*tree.Package{
+				"p": &tree.Package{"p", map[string]tree.Node{
 					"A": Sym("var", Sym("A", Sym("int"))),
 					"B": Sym("var", Sym("B", Sym("int"))),
 					"D": Sym("var", Sym("D", Sym("int"))),
@@ -325,9 +327,9 @@ const A int = 5
 `
 
 	expected := InterfaceContext{
-		Project: &Project{
-			Packages: map[string]*Package{
-				"p": &Package{"p", map[string]Node{
+		Project: &tree.Project{
+			Packages: map[string]*tree.Package{
+				"p": &tree.Package{"p", map[string]tree.Node{
 					"A": Sym("var", Sym("A", Sym("int"))),
 				}},
 			},
@@ -345,9 +347,9 @@ const a int = 5
 `
 
 	expected := InterfaceContext{
-		Project: &Project{
-			Packages: map[string]*Package{
-				"p": &Package{"p", map[string]Node{}},
+		Project: &tree.Project{
+			Packages: map[string]*tree.Package{
+				"p": &tree.Package{"p", map[string]tree.Node{}},
 			},
 		},
 	}
@@ -365,9 +367,9 @@ const F, G = "answer", 42
 `
 
 	expected := InterfaceContext{
-		Project: &Project{
-			Packages: map[string]*Package{
-				"p": &Package{"p", map[string]Node{
+		Project: &tree.Project{
+			Packages: map[string]*tree.Package{
+				"p": &tree.Package{"p", map[string]tree.Node{
 					"A": Sym("var", Sym("A", Sym("int"))),
 					"B": Sym("var", Sym("B", Sym("int"))),
 					"D": Sym("var", Sym("D", Sym("int"))),
@@ -393,10 +395,10 @@ func (ms MyStr) Something(a int) {
 `
 
 	expected := InterfaceContext{
-		Project: &Project{
-			Packages: map[string]*Package{
-				"p": &Package{"p", map[string]Node{
-					"MyStr": Sym("type", &Struct{"MyStr", map[string]Node{}}),
+		Project: &tree.Project{
+			Packages: map[string]*tree.Package{
+				"p": &tree.Package{"p", map[string]tree.Node{
+					"MyStr": Sym("type", &tree.Struct{"MyStr", map[string]tree.Node{}}),
 					"Something": Sym("method",
 						Sym("Something",
 							Sym("recv",
@@ -423,10 +425,10 @@ func (ms *MyStr) Something(a int) {
 `
 
 	expected := InterfaceContext{
-		Project: &Project{
-			Packages: map[string]*Package{
-				"p": &Package{"p", map[string]Node{
-					"MyStr": Sym("type", &Struct{"MyStr", map[string]Node{}}),
+		Project: &tree.Project{
+			Packages: map[string]*tree.Package{
+				"p": &tree.Package{"p", map[string]tree.Node{
+					"MyStr": Sym("type", &tree.Struct{"MyStr", map[string]tree.Node{}}),
 					"Something": Sym("method",
 						Sym("Something",
 							Sym("recv",
@@ -453,9 +455,9 @@ type InterStringer interface {
 `
 
 	expected := InterfaceContext{
-		Project: &Project{
-			Packages: map[string]*Package{
-				"p": &Package{"p", map[string]Node{
+		Project: &tree.Project{
+			Packages: map[string]*tree.Package{
+				"p": &tree.Package{"p", map[string]tree.Node{
 					"InterStringer": Sym("type",
 						Sym("InterStringer",
 							Sym("String",

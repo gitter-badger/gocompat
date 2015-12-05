@@ -1,4 +1,4 @@
-package main
+package tree
 
 // Struct represents a struct element in a Go program.
 type Struct struct {

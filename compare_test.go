@@ -4,14 +4,16 @@ import (
 	"go/parser"
 	"go/token"
 	"testing"
+
+	"github.com/s2gatev/gocompat/tree"
 )
 
-func parse(source string) *Project {
+func parse(source string) *tree.Project {
 	fileSet := token.NewFileSet()
 	file, _ := parser.ParseFile(fileSet, "source.go", source, parser.ParseComments)
 
 	context := &InterfaceContext{
-		Project: &Project{Packages: map[string]*Package{}},
+		Project: &tree.Project{Packages: map[string]*tree.Package{}},
 	}
 	ProcessFile(fileSet, file, context)
 

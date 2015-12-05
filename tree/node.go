@@ -1,4 +1,4 @@
-package main
+package tree
 
 // Node represents an element of a computer program developed in Go.
 type Node interface {

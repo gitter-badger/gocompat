@@ -4,17 +4,19 @@ import (
 	"go/ast"
 	"go/token"
 	"unicode"
+
+	"github.com/s2gatev/gocompat/tree"
 )
 
-func Sym(name string, nodes ...Node) *Symbol {
-	return &Symbol{name, nodes}
+func Sym(name string, nodes ...tree.Node) *tree.Symbol {
+	return &tree.Symbol{name, nodes}
 }
 
 // InterfaceContext is passed to the AST visitor in order to keep track the symbols
 // part of the program interface.
 type InterfaceContext struct {
-	CurrentPackage *Package
-	Project        *Project
+	CurrentPackage *tree.Package
+	Project        *tree.Project
 }
 
 // isExporeted returns if a given name should be public or private.
@@ -38,8 +40,8 @@ func kindToType(kind token.Token) string {
 }
 
 // extractSymbols returns the interface-specific symbols part of an AST expression.
-func extractSymbols(expr ast.Node) []*Symbol {
-	symbols := []*Symbol{}
+func extractSymbols(expr ast.Node) []*tree.Symbol {
+	symbols := []*tree.Symbol{}
 
 	switch t := expr.(type) {
 	case *ast.BasicLit:
@@ -54,7 +56,7 @@ func extractSymbols(expr ast.Node) []*Symbol {
 	case *ast.StructType:
 		for _, f := range t.Fields.List {
 			for _, n := range f.Names {
-				nodes := []Node{}
+				nodes := []tree.Node{}
 				for _, s := range extractSymbols(f.Type) {
 					nodes = append(nodes, s)
 				}
@@ -64,7 +66,7 @@ func extractSymbols(expr ast.Node) []*Symbol {
 	case *ast.InterfaceType:
 		for _, m := range t.Methods.List {
 			for _, n := range m.Names {
-				nodes := []Node{}
+				nodes := []tree.Node{}
 				for _, s := range extractSymbols(m.Type) {
 					nodes = append(nodes, s)
 				}
@@ -78,10 +80,10 @@ func extractSymbols(expr ast.Node) []*Symbol {
 		}
 	case *ast.FuncDecl:
 		if t.Recv != nil {
-			var recvSymbols []Node
+			var recvSymbols []tree.Node
 			for _, f := range t.Recv.List {
 				for _, _ = range f.Names {
-					nodes := []Node{}
+					nodes := []tree.Node{}
 					for _, s := range extractSymbols(f.Type) {
 						nodes = append(nodes, s)
 					}
@@ -92,17 +94,17 @@ func extractSymbols(expr ast.Node) []*Symbol {
 		}
 		symbols = append(symbols, extractSymbols(t.Type)...)
 	case *ast.FuncType:
-		var paramSymbols []Node
+		var paramSymbols []tree.Node
 		for _, f := range t.Params.List {
 			for _, _ = range f.Names {
-				nodes := []Node{}
+				nodes := []tree.Node{}
 				for _, s := range extractSymbols(f.Type) {
 					nodes = append(nodes, s)
 				}
 				paramSymbols = append(paramSymbols, nodes...)
 			}
 			if f.Names == nil {
-				nodes := []Node{}
+				nodes := []tree.Node{}
 				for _, s := range extractSymbols(f.Type) {
 					nodes = append(nodes, s)
 				}
@@ -111,10 +113,10 @@ func extractSymbols(expr ast.Node) []*Symbol {
 		}
 		symbols = append(symbols, Sym("params", paramSymbols...))
 
-		var resultSymbols []Node
+		var resultSymbols []tree.Node
 		if t.Results != nil {
 			for _, f := range t.Results.List {
-				nodes := []Node{}
+				nodes := []tree.Node{}
 				for _, s := range extractSymbols(f.Type) {
 					nodes = append(nodes, s)
 				}
@@ -134,7 +136,7 @@ func handlePackage(node ast.Node, context interface{}) {
 
 		if _, ok := context.Project.Packages[packageName]; !ok {
 			context.Project.Packages[packageName] =
-				&Package{packageName, map[string]Node{}}
+				&tree.Package{packageName, map[string]tree.Node{}}
 		}
 		context.CurrentPackage, _ = context.Project.Packages[packageName]
 	}
@@ -148,18 +150,18 @@ func handleTypeSpec(node ast.Node, context interface{}) {
 		if isExported(typeSpec.Name.Name) {
 			symbols := extractSymbols(typeSpec.Type)
 			if _, ok := typeSpec.Type.(*ast.StructType); ok {
-				ms := map[string]Node{}
+				ms := map[string]tree.Node{}
 				for _, s := range symbols {
 					ms[s.Name] = s
 				}
-				node := &Struct{Name: typeSpec.Name.Name, Fields: ms}
+				node := &tree.Struct{Name: typeSpec.Name.Name, Fields: ms}
 				current.Nodes[node.Name] = Sym("type", node)
 			} else {
-				nodes := []Node{}
+				nodes := []tree.Node{}
 				for _, s := range symbols {
 					nodes = append(nodes, s)
 				}
-				symbol := &Symbol{typeSpec.Name.Name, nodes}
+				symbol := &tree.Symbol{typeSpec.Name.Name, nodes}
 				current.Nodes[symbol.Name] = Sym("type", symbol)
 			}
 
@@ -173,11 +175,11 @@ func handleFuncDecl(node ast.Node, context interface{}) {
 		current := context.CurrentPackage
 
 		if isExported(funcDecl.Name.Name) {
-			nodes := []Node{}
+			nodes := []tree.Node{}
 			for _, s := range extractSymbols(funcDecl) {
 				nodes = append(nodes, s)
 			}
-			symbol := &Symbol{funcDecl.Name.Name, nodes}
+			symbol := &tree.Symbol{funcDecl.Name.Name, nodes}
 			if funcDecl.Recv != nil {
 				current.Nodes[symbol.Name] = Sym("method", symbol)
 			} else {
@@ -194,12 +196,12 @@ func handleSpec(spec ast.Node, context interface{}) {
 
 		if valueSpec.Type != nil {
 			typeSymbols := extractSymbols(valueSpec.Type)
-			nodes := []Node{}
+			nodes := []tree.Node{}
 			for _, s := range typeSymbols {
 				nodes = append(nodes, s)
 			}
 			for _, name := range valueSpec.Names {
-				symbol := &Symbol{name.Name, nodes}
+				symbol := &tree.Symbol{name.Name, nodes}
 				if isExported(symbol.Name) {
 					current.Nodes[symbol.Name] = Sym("var", symbol)
 				}
@@ -207,11 +209,11 @@ func handleSpec(spec ast.Node, context interface{}) {
 		} else {
 			for index, name := range valueSpec.Names {
 				typeSymbols := extractSymbols(valueSpec.Values[index])
-				nodes := []Node{}
+				nodes := []tree.Node{}
 				for _, s := range typeSymbols {
 					nodes = append(nodes, s)
 				}
-				symbol := &Symbol{name.Name, nodes}
+				symbol := &tree.Symbol{name.Name, nodes}
 				if isExported(symbol.Name) {
 					current.Nodes[symbol.Name] = Sym("var", symbol)
 				}

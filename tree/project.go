@@ -1,4 +1,4 @@
-package main
+package tree
 
 // Project represents a Go program with its constituent elements.
 type Project struct {

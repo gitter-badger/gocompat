@@ -1,4 +1,4 @@
-package main
+package tree
 
 // Package represents a package element in a Go program.
 type Package struct {

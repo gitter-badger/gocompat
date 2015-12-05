@@ -1,4 +1,4 @@
-package main
+package tree
 
 // Symbol represents a basic program component.
 type Symbol struct {
