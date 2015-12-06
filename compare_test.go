@@ -132,24 +132,6 @@ func Something(a string) {
 	testCompare(t, older, newer, true)
 }
 
-func TestFuncArgToVarArgs(t *testing.T) {
-	older := `
-package p
-
-func Something(a int) {
-}
-`
-
-	newer := `
-package p
-
-func Something(a ...int) {
-}
-`
-
-	testCompare(t, older, newer, false)
-}
-
 func TestTypeToVar(t *testing.T) {
 	older := `
 package p

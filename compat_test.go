@@ -37,7 +37,7 @@ type MyInt int
 		Project: &tree.Project{
 			Packages: map[string]*tree.Package{
 				"p": &tree.Package{"p", map[string]tree.Node{
-					"MyInt": Sym("type", Sym("MyInt", Sym("int"))),
+					"MyInt": &tree.TypeDef{"MyInt", &tree.SimpleType{"int"}},
 				}},
 			},
 		},
@@ -61,12 +61,11 @@ type MyInt struct {
 		Project: &tree.Project{
 			Packages: map[string]*tree.Package{
 				"p": &tree.Package{"p", map[string]tree.Node{
-					"MyInt": Sym("type",
-						&tree.Struct{"MyInt", map[string]tree.Node{
-							"A": Sym("A", Sym("int")),
-							"B": Sym("B", Sym("float32")),
-							"C": Sym("C", Sym("string")),
-						}}),
+					"MyInt": &tree.TypeDef{"MyInt", &tree.Struct{map[string]*tree.Field{
+						"A": &tree.Field{"A", &tree.SimpleType{"int"}},
+						"B": &tree.Field{"B", &tree.SimpleType{"float32"}},
+						"C": &tree.Field{"C", &tree.SimpleType{"string"}},
+					}}},
 				}},
 			},
 		},
@@ -92,14 +91,13 @@ type MyInt struct {
 		Project: &tree.Project{
 			Packages: map[string]*tree.Package{
 				"p": &tree.Package{"p", map[string]tree.Node{
-					"MyInt": Sym("type",
-						&tree.Struct{"MyInt", map[string]tree.Node{
-							"A": Sym("A", Sym("int")),
-							"B": Sym("B",
-								Sym("C", Sym("float32")),
-								Sym("D", Sym("string")),
-							),
-						}}),
+					"MyInt": &tree.TypeDef{"MyInt", &tree.Struct{map[string]*tree.Field{
+						"A": &tree.Field{"A", &tree.SimpleType{"int"}},
+						"B": &tree.Field{"B", &tree.Struct{map[string]*tree.Field{
+							"C": &tree.Field{"C", &tree.SimpleType{"float32"}},
+							"D": &tree.Field{"D", &tree.SimpleType{"string"}},
+						}}},
+					}}},
 				}},
 			},
 		},
@@ -139,12 +137,13 @@ func NameLength(name string) int {
 		Project: &tree.Project{
 			Packages: map[string]*tree.Package{
 				"p": &tree.Package{"p", map[string]tree.Node{
-					"NameLength": Sym("func", Sym("NameLength",
-						Sym("params",
-							Sym("string")),
-						Sym("results",
-							Sym("int")),
-					)),
+					"NameLength": &tree.Func{"NameLength",
+						nil,
+						&tree.Params{[]tree.Type{
+							&tree.SimpleType{"string"}}},
+						&tree.Results{[]tree.Type{
+							&tree.SimpleType{"int"}}},
+					},
 				}},
 			},
 		},
@@ -166,15 +165,16 @@ func Something(a, b string, options ...int) (int, bool) {
 		Project: &tree.Project{
 			Packages: map[string]*tree.Package{
 				"p": &tree.Package{"p", map[string]tree.Node{
-					"Something": Sym("func", Sym("Something",
-						Sym("params",
-							Sym("string"),
-							Sym("string"),
-							Sym("...int")),
-						Sym("results",
-							Sym("int"),
-							Sym("bool")),
-					)),
+					"Something": &tree.Func{"Something",
+						nil,
+						&tree.Params{[]tree.Type{
+							&tree.SimpleType{"string"},
+							&tree.SimpleType{"string"},
+							&tree.SimpleType{"...int"}}},
+						&tree.Results{[]tree.Type{
+							&tree.SimpleType{"int"},
+							&tree.SimpleType{"bool"}}},
+					},
 				}},
 			},
 		},
@@ -215,12 +215,15 @@ func Something(a, b string, options ...int) {
 		Project: &tree.Project{
 			Packages: map[string]*tree.Package{
 				"p": &tree.Package{"p", map[string]tree.Node{
-					"Something": Sym("func", Sym("Something",
-						Sym("params",
-							Sym("string"),
-							Sym("string"),
-							Sym("...int")),
-						Sym("results"))),
+					"Something": &tree.Func{"Something",
+						nil,
+						&tree.Params{[]tree.Type{
+							&tree.SimpleType{"string"},
+							&tree.SimpleType{"string"},
+							&tree.SimpleType{"...int"}},
+						},
+						nil,
+					},
 				}},
 			},
 		},
@@ -242,11 +245,13 @@ func Something() int {
 		Project: &tree.Project{
 			Packages: map[string]*tree.Package{
 				"p": &tree.Package{"p", map[string]tree.Node{
-					"Something": Sym("func", Sym("Something",
-						Sym("params"),
-						Sym("results",
-							Sym("int")))),
-				}},
+					"Something": &tree.Func{"Something",
+						nil,
+						nil,
+						&tree.Results{[]tree.Type{
+							&tree.SimpleType{"int"}}},
+					}},
+				},
 			},
 		},
 	}
@@ -265,7 +270,7 @@ var A int = 5
 		Project: &tree.Project{
 			Packages: map[string]*tree.Package{
 				"p": &tree.Package{"p", map[string]tree.Node{
-					"A": Sym("var", Sym("A", Sym("int"))),
+					"A": &tree.Var{"A", &tree.SimpleType{"int"}},
 				}},
 			},
 		},
@@ -305,12 +310,12 @@ var F, G = "answer", 42
 		Project: &tree.Project{
 			Packages: map[string]*tree.Package{
 				"p": &tree.Package{"p", map[string]tree.Node{
-					"A": Sym("var", Sym("A", Sym("int"))),
-					"B": Sym("var", Sym("B", Sym("int"))),
-					"D": Sym("var", Sym("D", Sym("int"))),
-					"S": Sym("var", Sym("S", Sym("string"))),
-					"F": Sym("var", Sym("F", Sym("string"))),
-					"G": Sym("var", Sym("G", Sym("int"))),
+					"A": &tree.Var{"A", &tree.SimpleType{"int"}},
+					"B": &tree.Var{"B", &tree.SimpleType{"int"}},
+					"D": &tree.Var{"D", &tree.SimpleType{"int"}},
+					"S": &tree.Var{"S", &tree.SimpleType{"string"}},
+					"F": &tree.Var{"F", &tree.SimpleType{"string"}},
+					"G": &tree.Var{"G", &tree.SimpleType{"int"}},
 				}},
 			},
 		},
@@ -330,7 +335,7 @@ const A int = 5
 		Project: &tree.Project{
 			Packages: map[string]*tree.Package{
 				"p": &tree.Package{"p", map[string]tree.Node{
-					"A": Sym("var", Sym("A", Sym("int"))),
+					"A": &tree.Var{"A", &tree.SimpleType{"int"}},
 				}},
 			},
 		},
@@ -370,12 +375,12 @@ const F, G = "answer", 42
 		Project: &tree.Project{
 			Packages: map[string]*tree.Package{
 				"p": &tree.Package{"p", map[string]tree.Node{
-					"A": Sym("var", Sym("A", Sym("int"))),
-					"B": Sym("var", Sym("B", Sym("int"))),
-					"D": Sym("var", Sym("D", Sym("int"))),
-					"S": Sym("var", Sym("S", Sym("string"))),
-					"F": Sym("var", Sym("F", Sym("string"))),
-					"G": Sym("var", Sym("G", Sym("int"))),
+					"A": &tree.Var{"A", &tree.SimpleType{"int"}},
+					"B": &tree.Var{"B", &tree.SimpleType{"int"}},
+					"D": &tree.Var{"D", &tree.SimpleType{"int"}},
+					"S": &tree.Var{"S", &tree.SimpleType{"string"}},
+					"F": &tree.Var{"F", &tree.SimpleType{"string"}},
+					"G": &tree.Var{"G", &tree.SimpleType{"int"}},
 				}},
 			},
 		},
@@ -398,14 +403,14 @@ func (ms MyStr) Something(a int) {
 		Project: &tree.Project{
 			Packages: map[string]*tree.Package{
 				"p": &tree.Package{"p", map[string]tree.Node{
-					"MyStr": Sym("type", &tree.Struct{"MyStr", map[string]tree.Node{}}),
-					"Something": Sym("method",
-						Sym("Something",
-							Sym("recv",
-								Sym("MyStr")),
-							Sym("params",
-								Sym("int")),
-							Sym("results"))),
+					"MyStr": &tree.TypeDef{"MyStr", &tree.Struct{map[string]*tree.Field{}}},
+					"Something": &tree.Func{"Something",
+						&tree.Recievers{[]tree.Type{
+							&tree.SimpleType{"MyStr"}}},
+						&tree.Params{[]tree.Type{
+							&tree.SimpleType{"int"}}},
+						nil,
+					},
 				}},
 			},
 		},
@@ -428,14 +433,14 @@ func (ms *MyStr) Something(a int) {
 		Project: &tree.Project{
 			Packages: map[string]*tree.Package{
 				"p": &tree.Package{"p", map[string]tree.Node{
-					"MyStr": Sym("type", &tree.Struct{"MyStr", map[string]tree.Node{}}),
-					"Something": Sym("method",
-						Sym("Something",
-							Sym("recv",
-								Sym("*MyStr")),
-							Sym("params",
-								Sym("int")),
-							Sym("results"))),
+					"MyStr": &tree.TypeDef{"MyStr", &tree.Struct{map[string]*tree.Field{}}},
+					"Something": &tree.Func{"Something",
+						&tree.Recievers{[]tree.Type{
+							&tree.SimpleType{"*MyStr"}}},
+						&tree.Params{[]tree.Type{
+							&tree.SimpleType{"int"}}},
+						nil,
+					},
 				}},
 			},
 		},
@@ -458,17 +463,21 @@ type InterStringer interface {
 		Project: &tree.Project{
 			Packages: map[string]*tree.Package{
 				"p": &tree.Package{"p", map[string]tree.Node{
-					"InterStringer": Sym("type",
-						Sym("InterStringer",
-							Sym("String",
-								Sym("params"),
-								Sym("results",
-									Sym("string"))),
-							Sym("Int",
-								Sym("params",
-									Sym("float64")),
-								Sym("results",
-									Sym("int"))))),
+					"InterStringer": &tree.TypeDef{"InterStringer", &tree.Interface{map[string]*tree.Func{
+						"String": &tree.Func{"String",
+							nil,
+							nil,
+							&tree.Results{[]tree.Type{
+								&tree.SimpleType{"string"}}},
+						},
+						"Int": &tree.Func{"Int",
+							nil,
+							&tree.Params{[]tree.Type{
+								&tree.SimpleType{"float64"}}},
+							&tree.Results{[]tree.Type{
+								&tree.SimpleType{"int"}}},
+						},
+					}}},
 				}},
 			},
 		},
