@@ -5,7 +5,7 @@ import (
 	"go/token"
 	"testing"
 
-	"github.com/s2gatev/gocompat/tree"
+	"github.com/s2gatev/gocompat/cst"
 )
 
 func testCompat(
@@ -17,7 +17,7 @@ func testCompat(
 	file, _ := parser.ParseFile(fileSet, "source.go", source, parser.ParseComments)
 
 	actual := &InterfaceContext{
-		Project: &tree.Project{Packages: map[string]*tree.Package{}},
+		Project: &cst.Project{Packages: map[string]*cst.Package{}},
 	}
 	ProcessFile(fileSet, file, actual)
 
@@ -34,10 +34,10 @@ type MyInt int
 `
 
 	expected := InterfaceContext{
-		Project: &tree.Project{
-			Packages: map[string]*tree.Package{
-				"p": &tree.Package{"p", map[string]tree.Node{
-					"MyInt": &tree.TypeDef{"MyInt", &tree.SimpleType{"int"}},
+		Project: &cst.Project{
+			Packages: map[string]*cst.Package{
+				"p": &cst.Package{"p", map[string]cst.Node{
+					"MyInt": &cst.TypeDef{"MyInt", &cst.SimpleType{"int"}},
 				}},
 			},
 		},
@@ -58,13 +58,13 @@ type MyInt struct {
 `
 
 	expected := InterfaceContext{
-		Project: &tree.Project{
-			Packages: map[string]*tree.Package{
-				"p": &tree.Package{"p", map[string]tree.Node{
-					"MyInt": &tree.TypeDef{"MyInt", &tree.Struct{map[string]*tree.Field{
-						"A": &tree.Field{"A", &tree.SimpleType{"int"}},
-						"B": &tree.Field{"B", &tree.SimpleType{"float32"}},
-						"C": &tree.Field{"C", &tree.SimpleType{"string"}},
+		Project: &cst.Project{
+			Packages: map[string]*cst.Package{
+				"p": &cst.Package{"p", map[string]cst.Node{
+					"MyInt": &cst.TypeDef{"MyInt", &cst.Struct{map[string]*cst.Field{
+						"A": &cst.Field{"A", &cst.SimpleType{"int"}},
+						"B": &cst.Field{"B", &cst.SimpleType{"float32"}},
+						"C": &cst.Field{"C", &cst.SimpleType{"string"}},
 					}}},
 				}},
 			},
@@ -88,14 +88,14 @@ type MyInt struct {
 `
 
 	expected := InterfaceContext{
-		Project: &tree.Project{
-			Packages: map[string]*tree.Package{
-				"p": &tree.Package{"p", map[string]tree.Node{
-					"MyInt": &tree.TypeDef{"MyInt", &tree.Struct{map[string]*tree.Field{
-						"A": &tree.Field{"A", &tree.SimpleType{"int"}},
-						"B": &tree.Field{"B", &tree.Struct{map[string]*tree.Field{
-							"C": &tree.Field{"C", &tree.SimpleType{"float32"}},
-							"D": &tree.Field{"D", &tree.SimpleType{"string"}},
+		Project: &cst.Project{
+			Packages: map[string]*cst.Package{
+				"p": &cst.Package{"p", map[string]cst.Node{
+					"MyInt": &cst.TypeDef{"MyInt", &cst.Struct{map[string]*cst.Field{
+						"A": &cst.Field{"A", &cst.SimpleType{"int"}},
+						"B": &cst.Field{"B", &cst.Struct{map[string]*cst.Field{
+							"C": &cst.Field{"C", &cst.SimpleType{"float32"}},
+							"D": &cst.Field{"D", &cst.SimpleType{"string"}},
 						}}},
 					}}},
 				}},
@@ -114,9 +114,9 @@ type myInt int
 `
 
 	expected := InterfaceContext{
-		Project: &tree.Project{
-			Packages: map[string]*tree.Package{
-				"p": &tree.Package{"p", map[string]tree.Node{}},
+		Project: &cst.Project{
+			Packages: map[string]*cst.Package{
+				"p": &cst.Package{"p", map[string]cst.Node{}},
 			},
 		},
 	}
@@ -134,15 +134,15 @@ func NameLength(name string) int {
 `
 
 	expected := InterfaceContext{
-		Project: &tree.Project{
-			Packages: map[string]*tree.Package{
-				"p": &tree.Package{"p", map[string]tree.Node{
-					"NameLength": &tree.Func{"NameLength",
+		Project: &cst.Project{
+			Packages: map[string]*cst.Package{
+				"p": &cst.Package{"p", map[string]cst.Node{
+					"NameLength": &cst.Func{"NameLength",
 						nil,
-						&tree.Params{[]tree.Type{
-							&tree.SimpleType{"string"}}},
-						&tree.Results{[]tree.Type{
-							&tree.SimpleType{"int"}}},
+						&cst.Params{[]cst.Type{
+							&cst.SimpleType{"string"}}},
+						&cst.Results{[]cst.Type{
+							&cst.SimpleType{"int"}}},
 					},
 				}},
 			},
@@ -162,18 +162,18 @@ func Something(a, b string, options ...int) (int, bool) {
 `
 
 	expected := InterfaceContext{
-		Project: &tree.Project{
-			Packages: map[string]*tree.Package{
-				"p": &tree.Package{"p", map[string]tree.Node{
-					"Something": &tree.Func{"Something",
+		Project: &cst.Project{
+			Packages: map[string]*cst.Package{
+				"p": &cst.Package{"p", map[string]cst.Node{
+					"Something": &cst.Func{"Something",
 						nil,
-						&tree.Params{[]tree.Type{
-							&tree.SimpleType{"string"},
-							&tree.SimpleType{"string"},
-							&tree.SimpleType{"...int"}}},
-						&tree.Results{[]tree.Type{
-							&tree.SimpleType{"int"},
-							&tree.SimpleType{"bool"}}},
+						&cst.Params{[]cst.Type{
+							&cst.SimpleType{"string"},
+							&cst.SimpleType{"string"},
+							&cst.SimpleType{"...int"}}},
+						&cst.Results{[]cst.Type{
+							&cst.SimpleType{"int"},
+							&cst.SimpleType{"bool"}}},
 					},
 				}},
 			},
@@ -193,9 +193,9 @@ func something(a, b string, options ...int) (int, bool) {
 `
 
 	expected := InterfaceContext{
-		Project: &tree.Project{
-			Packages: map[string]*tree.Package{
-				"p": &tree.Package{"p", map[string]tree.Node{}},
+		Project: &cst.Project{
+			Packages: map[string]*cst.Package{
+				"p": &cst.Package{"p", map[string]cst.Node{}},
 			},
 		},
 	}
@@ -212,15 +212,15 @@ func Something(a, b string, options ...int) {
 `
 
 	expected := InterfaceContext{
-		Project: &tree.Project{
-			Packages: map[string]*tree.Package{
-				"p": &tree.Package{"p", map[string]tree.Node{
-					"Something": &tree.Func{"Something",
+		Project: &cst.Project{
+			Packages: map[string]*cst.Package{
+				"p": &cst.Package{"p", map[string]cst.Node{
+					"Something": &cst.Func{"Something",
 						nil,
-						&tree.Params{[]tree.Type{
-							&tree.SimpleType{"string"},
-							&tree.SimpleType{"string"},
-							&tree.SimpleType{"...int"}},
+						&cst.Params{[]cst.Type{
+							&cst.SimpleType{"string"},
+							&cst.SimpleType{"string"},
+							&cst.SimpleType{"...int"}},
 						},
 						nil,
 					},
@@ -242,14 +242,14 @@ func Something() int {
 `
 
 	expected := InterfaceContext{
-		Project: &tree.Project{
-			Packages: map[string]*tree.Package{
-				"p": &tree.Package{"p", map[string]tree.Node{
-					"Something": &tree.Func{"Something",
+		Project: &cst.Project{
+			Packages: map[string]*cst.Package{
+				"p": &cst.Package{"p", map[string]cst.Node{
+					"Something": &cst.Func{"Something",
 						nil,
 						nil,
-						&tree.Results{[]tree.Type{
-							&tree.SimpleType{"int"}}},
+						&cst.Results{[]cst.Type{
+							&cst.SimpleType{"int"}}},
 					}},
 				},
 			},
@@ -267,10 +267,10 @@ var A int = 5
 `
 
 	expected := InterfaceContext{
-		Project: &tree.Project{
-			Packages: map[string]*tree.Package{
-				"p": &tree.Package{"p", map[string]tree.Node{
-					"A": &tree.Var{"A", &tree.SimpleType{"int"}},
+		Project: &cst.Project{
+			Packages: map[string]*cst.Package{
+				"p": &cst.Package{"p", map[string]cst.Node{
+					"A": &cst.Var{"A", &cst.SimpleType{"int"}},
 				}},
 			},
 		},
@@ -287,9 +287,9 @@ var a int = 5
 `
 
 	expected := InterfaceContext{
-		Project: &tree.Project{
-			Packages: map[string]*tree.Package{
-				"p": &tree.Package{"p", map[string]tree.Node{}},
+		Project: &cst.Project{
+			Packages: map[string]*cst.Package{
+				"p": &cst.Package{"p", map[string]cst.Node{}},
 			},
 		},
 	}
@@ -307,15 +307,15 @@ var F, G = "answer", 42
 `
 
 	expected := InterfaceContext{
-		Project: &tree.Project{
-			Packages: map[string]*tree.Package{
-				"p": &tree.Package{"p", map[string]tree.Node{
-					"A": &tree.Var{"A", &tree.SimpleType{"int"}},
-					"B": &tree.Var{"B", &tree.SimpleType{"int"}},
-					"D": &tree.Var{"D", &tree.SimpleType{"int"}},
-					"S": &tree.Var{"S", &tree.SimpleType{"string"}},
-					"F": &tree.Var{"F", &tree.SimpleType{"string"}},
-					"G": &tree.Var{"G", &tree.SimpleType{"int"}},
+		Project: &cst.Project{
+			Packages: map[string]*cst.Package{
+				"p": &cst.Package{"p", map[string]cst.Node{
+					"A": &cst.Var{"A", &cst.SimpleType{"int"}},
+					"B": &cst.Var{"B", &cst.SimpleType{"int"}},
+					"D": &cst.Var{"D", &cst.SimpleType{"int"}},
+					"S": &cst.Var{"S", &cst.SimpleType{"string"}},
+					"F": &cst.Var{"F", &cst.SimpleType{"string"}},
+					"G": &cst.Var{"G", &cst.SimpleType{"int"}},
 				}},
 			},
 		},
@@ -332,10 +332,10 @@ const A int = 5
 `
 
 	expected := InterfaceContext{
-		Project: &tree.Project{
-			Packages: map[string]*tree.Package{
-				"p": &tree.Package{"p", map[string]tree.Node{
-					"A": &tree.Var{"A", &tree.SimpleType{"int"}},
+		Project: &cst.Project{
+			Packages: map[string]*cst.Package{
+				"p": &cst.Package{"p", map[string]cst.Node{
+					"A": &cst.Var{"A", &cst.SimpleType{"int"}},
 				}},
 			},
 		},
@@ -352,9 +352,9 @@ const a int = 5
 `
 
 	expected := InterfaceContext{
-		Project: &tree.Project{
-			Packages: map[string]*tree.Package{
-				"p": &tree.Package{"p", map[string]tree.Node{}},
+		Project: &cst.Project{
+			Packages: map[string]*cst.Package{
+				"p": &cst.Package{"p", map[string]cst.Node{}},
 			},
 		},
 	}
@@ -372,15 +372,15 @@ const F, G = "answer", 42
 `
 
 	expected := InterfaceContext{
-		Project: &tree.Project{
-			Packages: map[string]*tree.Package{
-				"p": &tree.Package{"p", map[string]tree.Node{
-					"A": &tree.Var{"A", &tree.SimpleType{"int"}},
-					"B": &tree.Var{"B", &tree.SimpleType{"int"}},
-					"D": &tree.Var{"D", &tree.SimpleType{"int"}},
-					"S": &tree.Var{"S", &tree.SimpleType{"string"}},
-					"F": &tree.Var{"F", &tree.SimpleType{"string"}},
-					"G": &tree.Var{"G", &tree.SimpleType{"int"}},
+		Project: &cst.Project{
+			Packages: map[string]*cst.Package{
+				"p": &cst.Package{"p", map[string]cst.Node{
+					"A": &cst.Var{"A", &cst.SimpleType{"int"}},
+					"B": &cst.Var{"B", &cst.SimpleType{"int"}},
+					"D": &cst.Var{"D", &cst.SimpleType{"int"}},
+					"S": &cst.Var{"S", &cst.SimpleType{"string"}},
+					"F": &cst.Var{"F", &cst.SimpleType{"string"}},
+					"G": &cst.Var{"G", &cst.SimpleType{"int"}},
 				}},
 			},
 		},
@@ -400,15 +400,15 @@ func (ms MyStr) Something(a int) {
 `
 
 	expected := InterfaceContext{
-		Project: &tree.Project{
-			Packages: map[string]*tree.Package{
-				"p": &tree.Package{"p", map[string]tree.Node{
-					"MyStr": &tree.TypeDef{"MyStr", &tree.Struct{map[string]*tree.Field{}}},
-					"Something": &tree.Func{"Something",
-						&tree.Recievers{[]tree.Type{
-							&tree.SimpleType{"MyStr"}}},
-						&tree.Params{[]tree.Type{
-							&tree.SimpleType{"int"}}},
+		Project: &cst.Project{
+			Packages: map[string]*cst.Package{
+				"p": &cst.Package{"p", map[string]cst.Node{
+					"MyStr": &cst.TypeDef{"MyStr", &cst.Struct{map[string]*cst.Field{}}},
+					"Something": &cst.Func{"Something",
+						&cst.Recievers{[]cst.Type{
+							&cst.SimpleType{"MyStr"}}},
+						&cst.Params{[]cst.Type{
+							&cst.SimpleType{"int"}}},
 						nil,
 					},
 				}},
@@ -430,15 +430,15 @@ func (ms *MyStr) Something(a int) {
 `
 
 	expected := InterfaceContext{
-		Project: &tree.Project{
-			Packages: map[string]*tree.Package{
-				"p": &tree.Package{"p", map[string]tree.Node{
-					"MyStr": &tree.TypeDef{"MyStr", &tree.Struct{map[string]*tree.Field{}}},
-					"Something": &tree.Func{"Something",
-						&tree.Recievers{[]tree.Type{
-							&tree.SimpleType{"*MyStr"}}},
-						&tree.Params{[]tree.Type{
-							&tree.SimpleType{"int"}}},
+		Project: &cst.Project{
+			Packages: map[string]*cst.Package{
+				"p": &cst.Package{"p", map[string]cst.Node{
+					"MyStr": &cst.TypeDef{"MyStr", &cst.Struct{map[string]*cst.Field{}}},
+					"Something": &cst.Func{"Something",
+						&cst.Recievers{[]cst.Type{
+							&cst.SimpleType{"*MyStr"}}},
+						&cst.Params{[]cst.Type{
+							&cst.SimpleType{"int"}}},
 						nil,
 					},
 				}},
@@ -460,22 +460,22 @@ type InterStringer interface {
 `
 
 	expected := InterfaceContext{
-		Project: &tree.Project{
-			Packages: map[string]*tree.Package{
-				"p": &tree.Package{"p", map[string]tree.Node{
-					"InterStringer": &tree.TypeDef{"InterStringer", &tree.Interface{map[string]*tree.Func{
-						"String": &tree.Func{"String",
+		Project: &cst.Project{
+			Packages: map[string]*cst.Package{
+				"p": &cst.Package{"p", map[string]cst.Node{
+					"InterStringer": &cst.TypeDef{"InterStringer", &cst.Interface{map[string]*cst.Func{
+						"String": &cst.Func{"String",
 							nil,
 							nil,
-							&tree.Results{[]tree.Type{
-								&tree.SimpleType{"string"}}},
+							&cst.Results{[]cst.Type{
+								&cst.SimpleType{"string"}}},
 						},
-						"Int": &tree.Func{"Int",
+						"Int": &cst.Func{"Int",
 							nil,
-							&tree.Params{[]tree.Type{
-								&tree.SimpleType{"float64"}}},
-							&tree.Results{[]tree.Type{
-								&tree.SimpleType{"int"}}},
+							&cst.Params{[]cst.Type{
+								&cst.SimpleType{"float64"}}},
+							&cst.Results{[]cst.Type{
+								&cst.SimpleType{"int"}}},
 						},
 					}}},
 				}},

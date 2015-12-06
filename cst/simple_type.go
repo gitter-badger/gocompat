@@ -1,5 +1,6 @@
-package tree
+package cst
 
+// SimpleType represents atomic type node - int, string, float64, etc...
 type SimpleType struct {
 	Name string
 }

@@ -1,5 +1,6 @@
-package tree
+package cst
 
+// Interface represents an interface type node.
 type Interface struct {
 	Funcs map[string]*Func
 }

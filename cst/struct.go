@@ -1,6 +1,6 @@
-package tree
+package cst
 
-// Struct represents a struct element in a Go program.
+// Struct represents a struct type node.
 type Struct struct {
 	Fields map[string]*Field
 }

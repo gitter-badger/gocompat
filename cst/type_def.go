@@ -1,5 +1,6 @@
-package tree
+package cst
 
+// TypeDef represents a type definition node.
 type TypeDef struct {
 	Name string
 	Type Type

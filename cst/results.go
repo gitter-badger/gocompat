@@ -1,11 +1,12 @@
-package tree
+package cst
 
-type Recievers struct {
+// Results represents function results node.
+type Results struct {
 	Types []Type
 }
 
-func (older *Recievers) Compare(n Node) bool {
-	if newer, ok := n.(*Recievers); ok {
+func (older *Results) Compare(n Node) bool {
+	if newer, ok := n.(*Results); ok {
 		for i, oType := range older.Types {
 			nType := newer.Types[i]
 			if !oType.Compare(nType) {

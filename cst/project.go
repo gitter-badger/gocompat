@@ -1,4 +1,4 @@
-package tree
+package cst
 
 // Project represents a Go program with its constituent elements.
 type Project struct {

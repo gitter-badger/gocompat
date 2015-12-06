@@ -1,12 +1,13 @@
-package tree
+package cst
 
-type Var struct {
+// Field represents a struct field node.
+type Field struct {
 	Name string
 	Type Type
 }
 
-func (older *Var) Compare(n Node) bool {
-	if newer, ok := n.(*Var); ok {
+func (older *Field) Compare(n Node) bool {
+	if newer, ok := n.(*Field); ok {
 		if older.Name != newer.Name {
 			return false
 		}

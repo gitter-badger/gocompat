@@ -12,7 +12,7 @@ import (
 	"path/filepath"
 	"regexp"
 
-	"github.com/s2gatev/gocompat/tree"
+	"github.com/s2gatev/gocompat/cst"
 )
 
 const compatIndexFileName = ".gocompat"
@@ -20,7 +20,7 @@ const compatIndexFileName = ".gocompat"
 var goFilePattern = regexp.MustCompile(`^.*\.go$`)
 
 var context = &InterfaceContext{
-	Project: &tree.Project{Packages: map[string]*tree.Package{}},
+	Project: &cst.Project{Packages: map[string]*cst.Package{}},
 }
 
 // Flags.
@@ -53,7 +53,7 @@ func main() {
 
 	// If index is present compare current API to the previous version.
 	if content, err := ioutil.ReadFile(compatIndexFileName); err == nil {
-		older := &tree.Project{}
+		older := &cst.Project{}
 		decoder := gob.NewDecoder(bytes.NewReader([]byte(content)))
 
 		if err = decoder.Decode(older); err == nil {

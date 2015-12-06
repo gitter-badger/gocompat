@@ -1,15 +1,12 @@
-package tree
+package cst
 
-type Params struct {
+// Recievers represents function recievers node.
+type Recievers struct {
 	Types []Type
 }
 
-func (older *Params) Compare(n Node) bool {
-	if newer, ok := n.(*Params); ok {
-		if len(older.Types) != len(newer.Types) {
-			return false
-		}
-
+func (older *Recievers) Compare(n Node) bool {
+	if newer, ok := n.(*Recievers); ok {
 		for i, oType := range older.Types {
 			nType := newer.Types[i]
 			if !oType.Compare(nType) {

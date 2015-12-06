@@ -1,5 +1,6 @@
-package tree
+package cst
 
+// Func represents a function definition node.
 type Func struct {
 	Name      string
 	Recievers *Recievers

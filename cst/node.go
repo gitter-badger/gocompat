@@ -1,6 +1,6 @@
-package tree
+package cst
 
-// Node represents an element of a computer program developed in Go.
+// Node represents an element of the concrete syntax tree.
 type Node interface {
 
 	// Compare performs semantically-specific comparison with another node.

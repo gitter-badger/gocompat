@@ -1,6 +1,6 @@
-package tree
+package cst
 
-// Package represents a package element in a Go program.
+// Package a package node.
 type Package struct {
 	Name  string
 	Nodes map[string]Node
